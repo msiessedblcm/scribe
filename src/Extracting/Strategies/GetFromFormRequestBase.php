@@ -10,6 +10,7 @@ use Knuckles\Scribe\Extracting\FindsFormRequestForMethod;
 use Knuckles\Scribe\Extracting\ParsesValidationRules;
 use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
 use Knuckles\Scribe\Tools\Globals;
+use Knuckles\Scribe\Tools\RouteDecorator;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
@@ -39,6 +40,10 @@ class GetFromFormRequestBase extends Strategy
 
         if (Globals::$__instantiateFormRequestUsing) {
             $formRequest = call_user_func_array(Globals::$__instantiateFormRequestUsing, [$className, $route, $method]);
+        } elseif ($className == "Lorisleiva\Actions\ActionRequest") {
+            $formRequest = new $className;
+            $decoratedRoute = new RouteDecorator($route);
+            $formRequest->setAction($decoratedRoute->getContainer()->make($route->action["controller"]));
         } else {
             $formRequest = new $className;
         }

@@ -22,17 +22,17 @@ class ApiResourceResponseTools
 {
     public static function fetch(
         string $apiResourceClass, bool $isCollection, ?callable $modelInstantiator,
-        ExtractedEndpointData $endpointData, array $pagination, array $additionalData
+        ExtractedEndpointData $endpointData, array $pagination, array $additionalData, ?string $key
     )
     {
         $resource = static::getApiResourceOrCollectionInstance(
             $apiResourceClass, $isCollection, $modelInstantiator, $pagination, $additionalData
         );
-        $response = static::callApiResourceAndGetResponse($resource, $endpointData);
+        $response = static::callApiResourceAndGetResponse($resource, $endpointData, $key);
         return $response->getContent();
     }
 
-    public static function callApiResourceAndGetResponse(JsonResource $resource, ExtractedEndpointData $endpointData): JsonResponse
+    public static function callApiResourceAndGetResponse(JsonResource $resource, ExtractedEndpointData $endpointData, ?string $key): JsonResponse
     {
         $uri = Utils::getUrlWithBoundParameters($endpointData->route->uri(), $endpointData->cleanUrlParameters);
         $method = $endpointData->route->methods()[0];
@@ -44,7 +44,7 @@ class ApiResourceResponseTools
         $previousBoundRequest = app('request');
         app()->bind('request', fn() => $request);
 
-        $response = $resource->toResponse($request);
+        $response = $key ? new JsonResponse([$key => $resource->toArray($request)]) : new JsonResponse($resource->toArray($request));
 
         app()->bind('request', fn() => $previousBoundRequest);
 

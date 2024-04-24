@@ -13,6 +13,7 @@ class ResponseFromApiResource
         public string $name,
         public ?string $model = null,
         public int $status = 200,
+        public ?string $key = "data",
         public ?string $description = '',
 
         /* Mark if this should be used as a collection. Only needed if not using a ResourceCollection. */

@@ -73,8 +73,13 @@ class UseResponseAttributes extends PhpAttributeStrategy
 
         $this->startDbTransaction();
         $content = ApiResourceResponseTools::fetch(
-            $attributeInstance->name, $attributeInstance->isCollection(), $modelInstantiator,
-            $this->endpointData, $pagination, $attributeInstance->additional,
+            $attributeInstance->name,
+            $attributeInstance->isCollection(),
+            $modelInstantiator,
+            $this->endpointData,
+            $pagination,
+            $attributeInstance->additional,
+            $attributeInstance->key
         );
         $this->endDbTransaction();
 
