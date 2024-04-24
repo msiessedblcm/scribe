@@ -1,6 +1,7 @@
 {
     "name": "knuckleswtf/scribe",
     "license": "MIT",
+    "version": "4.31.0",
     "description": "Generate API documentation for humans from your Laravel codebase.✍",
     "keywords": [
         "API",
