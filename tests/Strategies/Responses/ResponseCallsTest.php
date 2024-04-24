@@ -4,6 +4,7 @@ namespace Knuckles\Scribe\Tests\Strategies\Responses;
 
 use Dingo\Api\Routing\Router;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Route as LaravelRouteFacade;
 use Illuminate\Support\Facades\Route as RouteFacade;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Camel\Extraction\ResponseCollection;
@@ -13,7 +14,6 @@ use Knuckles\Scribe\Scribe;
 use Knuckles\Scribe\Tests\BaseLaravelTest;
 use Knuckles\Scribe\Tests\Fixtures\TestController;
 use Knuckles\Scribe\Tools\DocumentationConfig;
-use Illuminate\Support\Facades\Route as LaravelRouteFacade;
 use Symfony\Component\HttpFoundation\Request;
 
 class ResponseCallsTest extends BaseLaravelTest
@@ -59,9 +59,9 @@ class ResponseCallsTest extends BaseLaravelTest
         $responses = $parsed->responses->toArray();
         $this->assertCount(1, $responses);
         $this->assertArraySubset([
-            "status" => 200,
-            "description" => null,
-            "content" => '{"filename":"scribe.php","filepath":"config","name":"cat.jpg"}',
+            'status' => 200,
+            'description' => null,
+            'content' => '{"filename":"scribe.php","filepath":"config","name":"cat.jpg"}',
         ], $responses[0]);
     }
 
@@ -92,8 +92,10 @@ class ResponseCallsTest extends BaseLaravelTest
         ]);
 
         $strategy = new ResponseCalls(new DocumentationConfig([]));
-        $results = $strategy($endpointData,
-            $this->convertRules($rules));
+        $results = $strategy(
+            $endpointData,
+            $this->convertRules($rules)
+        );
 
         $this->assertEquals(200, $results[0]['status']);
 
@@ -139,10 +141,10 @@ class ResponseCallsTest extends BaseLaravelTest
     public function calls_beforeResponseCall_hook()
     {
         Scribe::beforeResponseCall(function (Request $request, ExtractedEndpointData $endpointData) {
-            $request->headers->set("header", "overridden_".$request->headers->get("header"));
-            $request->headers->set("Authorization", "overridden_".$request->headers->get("Authorization"));
-            $request->query->set("queryParam", "overridden_".$request->query->get("queryParam"));
-            $request->request->set("bodyParam", "overridden_".$endpointData->uri.$request->request->get("bodyParam"));
+            $request->headers->set('header', 'overridden_' . $request->headers->get('header'));
+            $request->headers->set('Authorization', 'overridden_' . $request->headers->get('Authorization'));
+            $request->query->set('queryParam', 'overridden_' . $request->query->get('queryParam'));
+            $request->request->set('bodyParam', 'overridden_' . $endpointData->uri . $request->request->get('bodyParam'));
         });
 
         $route = LaravelRouteFacade::post('/echo/{id}', [TestController::class, 'echoesRequestValues']);
@@ -179,11 +181,12 @@ class ResponseCallsTest extends BaseLaravelTest
         $this->assertEquals('overridden_Bearer bearerToken', $responseContent['auth']);
         $this->assertEquals('overridden_echo/{id}bodyValue', $responseContent['bodyParam']);
 
-        Scribe::beforeResponseCall(fn() => null);
+        Scribe::beforeResponseCall(fn () => null);
     }
 
     /**
      * @test
+     *
      * @group dingo
      */
     public function can_call_route_and_fetch_response_with_dingo()
@@ -211,6 +214,7 @@ class ResponseCallsTest extends BaseLaravelTest
 
     /**
      * @test
+     *
      * @group dingo
      */
     public function uses_configured_settings_when_calling_route_with_dingo()
@@ -249,6 +253,7 @@ class ResponseCallsTest extends BaseLaravelTest
 
     /**
      * @test
+     *
      * @group dingo
      */
     public function can_override_application_config_during_response_call_with_dingo()
@@ -322,7 +327,8 @@ class ResponseCallsTest extends BaseLaravelTest
         return collect($routes)
             ->first(function (Route $route) use ($desiredRoute) {
                 return $route->uri() === $desiredRoute->uri();
-            });
+            })
+        ;
     }
 
     protected function convertRules(array $rules): mixed

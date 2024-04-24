@@ -17,7 +17,7 @@ class GetFromInlineValidatorBase extends Strategy
 
     public function __invoke(ExtractedEndpointData $endpointData, array $routeRules = []): ?array
     {
-        if (!$endpointData->method instanceof \ReflectionMethod) {
+        if (! $endpointData->method instanceof \ReflectionMethod) {
             return [];
         }
 
@@ -25,6 +25,7 @@ class GetFromInlineValidatorBase extends Strategy
         [$validationRules, $customParameterData] = $this->lookForInlineValidationRules($methodAst);
 
         $bodyParametersFromValidationRules = $this->getParametersFromValidationRules($validationRules, $customParameterData);
+
         return $this->normaliseArrayAndObjectParameters($bodyParametersFromValidationRules);
     }
 
@@ -36,7 +37,7 @@ class GetFromInlineValidatorBase extends Strategy
         [$index, $validationStatement, $validationRules] = $this->findValidationExpression($statements);
 
         if ($validationStatement &&
-            !$this->isValidationStatementMeantForThisStrategy($validationStatement)) {
+            ! $this->isValidationStatementMeantForThisStrategy($validationStatement)) {
             return [[], []];
         }
 
@@ -56,7 +57,7 @@ class GetFromInlineValidatorBase extends Strategy
             }
         }
 
-        if (!$validationRules instanceof Node\Expr\Array_) {
+        if (! $validationRules instanceof Node\Expr\Array_) {
             return [[], []];
         }
 
@@ -64,7 +65,7 @@ class GetFromInlineValidatorBase extends Strategy
         $customParameterData = [];
         foreach ($validationRules->items as $item) {
             /** @var Node\ArrayItem $item */
-            if (!$item->key instanceof Node\Scalar\String_) {
+            if (! $item->key instanceof Node\Scalar\String_) {
                 continue;
             }
 
@@ -74,7 +75,7 @@ class GetFromInlineValidatorBase extends Strategy
             // For now, let's focus on simple strings and arrays of strings
             if ($item->value instanceof Node\Scalar\String_) {
                 $rules[$paramName] = $item->value->value;
-            } else if ($item->value instanceof Node\Expr\Array_) {
+            } elseif ($item->value instanceof Node\Expr\Array_) {
                 $rulesList = [];
                 foreach ($item->value->items as $arrayItem) {
                     /** @var Node\ArrayItem $arrayItem */
@@ -83,7 +84,7 @@ class GetFromInlineValidatorBase extends Strategy
                     }
 
                     // Try to extract Enum rule
-                    else if (
+                    elseif (
                         function_exists('enum_exists') &&
                         ($enum = $this->extractEnumClassFromArrayItem($arrayItem)) &&
                         enum_exists($enum) && method_exists($enum, 'tryFrom')
@@ -94,20 +95,23 @@ class GetFromInlineValidatorBase extends Strategy
                         $rulesList[] = 'in:' . implode(',', array_map(fn ($case) => $case->value, $enum::cases()));
                     }
                 }
-                $rules[$paramName] = join('|', $rulesList);
+                $rules[$paramName] = implode('|', $rulesList);
             } else {
                 $rules[$paramName] = [];
+
                 continue;
             }
 
             $dataFromComment = [];
-            $comments = join("\n", array_map(
-                    fn($comment) => ltrim(ltrim($comment->getReformattedText(), "/")),
-                    $item->getComments()
-                ));
+            $comments = implode("\n", array_map(
+                fn ($comment) => ltrim(ltrim($comment->getReformattedText(), '/')),
+                $item->getComments()
+            ));
 
             if ($comments) {
-                if (str_contains($comments, 'No-example')) $dataFromComment['example'] = null;
+                if (str_contains($comments, 'No-example')) {
+                    $dataFromComment['example'] = null;
+                }
 
                 $dataFromComment['description'] = trim(str_replace(['No-example.', 'No-example'], '', $comments));
                 if (preg_match('/(.*\s+|^)Example:\s*([\s\S]+)\s*/s', $dataFromComment['description'], $matches)) {
@@ -135,7 +139,7 @@ class GetFromInlineValidatorBase extends Strategy
         }
 
         // Enum rule with the form "Rule::enum(...)"
-        else if ($arrayItem->value instanceof Node\Expr\StaticCall &&
+        elseif ($arrayItem->value instanceof Node\Expr\StaticCall &&
             $arrayItem->value->class instanceof Node\Name &&
             str_ends_with($arrayItem->value->class->name, 'Rule') &&
             $arrayItem->value->name instanceof Node\Identifier &&
@@ -144,14 +148,16 @@ class GetFromInlineValidatorBase extends Strategy
             $args = $arrayItem->value->args;
         }
 
-        if (count($args) !== 1 || !$args[0] instanceof Node\Arg) return null;
+        if (count($args) !== 1 || ! $args[0] instanceof Node\Arg) {
+            return null;
+        }
 
         $arg = $args[0];
         if ($arg->value instanceof Node\Expr\ClassConstFetch &&
             $arg->value->class instanceof Node\Name
         ) {
             return '\\' . $arg->value->class->name;
-        } else if ($arg->value instanceof Node\Scalar\String_) {
+        } elseif ($arg->value instanceof Node\Scalar\String_) {
             return $arg->value->value;
         }
 

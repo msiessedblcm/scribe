@@ -2,9 +2,9 @@
 
 namespace Knuckles\Scribe\Extracting\Strategies\Responses;
 
-use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Exception;
 use Illuminate\Support\Arr;
+use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Extracting\DatabaseTransactionHelpers;
 use Knuckles\Scribe\Extracting\InstantiatesExampleModels;
 use Knuckles\Scribe\Extracting\RouteDocBlocker;
@@ -15,7 +15,6 @@ use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
 use Knuckles\Scribe\Tools\Utils;
 use Mpociot\Reflection\DocBlock;
 use Mpociot\Reflection\DocBlock\Tag;
-use ReflectionClass;
 
 /**
  * Parse an Eloquent API resource response from the docblock ( @apiResource || @apiResourcecollection ).
@@ -39,11 +38,9 @@ class UseApiResourceTags extends Strategy
     /**
      * Get a response from the @apiResource/@apiResourceCollection, @apiResourceModel and @apiResourceAdditional tags.
      *
-     * @param Tag $apiResourceTag
-     * @param Tag[] $allTags
-     * @param ExtractedEndpointData $endpointData
-     *
+     * @param  Tag[]  $allTags
      * @return array[]|null
+     *
      * @throws Exception
      */
     public function getApiResourceResponseFromTags(Tag $apiResourceTag, array $allTags, ExtractedEndpointData $endpointData): ?array
@@ -52,12 +49,16 @@ class UseApiResourceTags extends Strategy
         [$modelClass, $factoryStates, $relations, $pagination] = $this->getClassToBeTransformedAndAttributes($allTags, $apiResourceClass, $extra);
         $additionalData = $this->getAdditionalData($allTags);
 
-        $modelInstantiator = fn() => $this->instantiateExampleModel($modelClass, $factoryStates, $relations);
+        $modelInstantiator = fn () => $this->instantiateExampleModel($modelClass, $factoryStates, $relations);
 
         $this->startDbTransaction();
         $content = ApiResourceResponseTools::fetch(
-            $apiResourceClass, $isCollection, $modelInstantiator,
-            $endpointData, $pagination, $additionalData,
+            $apiResourceClass,
+            $isCollection,
+            $modelInstantiator,
+            $endpointData,
+            $pagination,
+            $additionalData,
         );
         $this->endDbTransaction();
 
@@ -82,14 +83,14 @@ class UseApiResourceTags extends Strategy
             'content' => $content
         ] = a::parseIntoContentAndFields($content, static::apiResourceAllowedFields());
 
-
         $status = $fields['status'] ?: $status;
         $apiResourceClass = $content;
-        $description = $fields['scenario'] ?: "";
+        $description = $fields['scenario'] ?: '';
 
         $isCollection = strtolower($tag->getName()) == 'apiresourcecollection';
+
         return [
-            (int)$status,
+            (int) $status,
             $description,
             $apiResourceClass,
             $isCollection,
@@ -117,7 +118,8 @@ class UseApiResourceTags extends Strategy
         }
 
         if (empty($modelClass)) {
-            c::warn(<<<WARN
+            c::warn(
+                <<<'WARN'
                 Couldn't detect an Eloquent API resource model from your `@apiResource`.
                 Either specify a model using the `@apiResourceModel` annotation, or add an `@mixin` annotation in your resource's docblock.
                 WARN
@@ -130,13 +132,12 @@ class UseApiResourceTags extends Strategy
     /**
      * Returns data for simulating JsonResource ->additional() function
      *
-     * @param Tag[] $tags
-     *
-     * @return array
+     * @param  Tag[]  $tags
      */
     private function getAdditionalData(array $tags): array
     {
         $tag = Arr::first(Utils::filterDocBlockTags($tags, 'apiresourceadditional'));
+
         return $tag ? a::parseIntoFields($tag->getContent()) : [];
     }
 

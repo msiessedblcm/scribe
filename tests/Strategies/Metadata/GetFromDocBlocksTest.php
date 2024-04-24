@@ -2,10 +2,10 @@
 
 namespace Knuckles\Scribe\Tests\Strategies\Metadata;
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Scribe\Extracting\Strategies\Metadata\GetFromDocBlocks;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use Mpociot\Reflection\DocBlock;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use PHPUnit\Framework\TestCase;
 
 class GetFromDocBlocksTest extends TestCase
@@ -16,7 +16,7 @@ class GetFromDocBlocksTest extends TestCase
     public function can_fetch_metadata_from_method_docblock()
     {
         $strategy = new GetFromDocBlocks(new DocumentationConfig([]));
-        $methodDocblock = <<<DOCBLOCK
+        $methodDocblock = <<<'DOCBLOCK'
 /**
   * Endpoint title.
   * Endpoint description.
@@ -36,14 +36,14 @@ DOCBLOCK;
     public function can_fetch_metadata_from_method_and_class()
     {
         $strategy = new GetFromDocBlocks(new DocumentationConfig([]));
-        $methodDocblock = <<<DOCBLOCK
+        $methodDocblock = <<<'DOCBLOCK'
 /**
   * Endpoint title.
   * Endpoint description.
   * Multiline.
   */
 DOCBLOCK;
-        $classDocblock = <<<DOCBLOCK
+        $classDocblock = <<<'DOCBLOCK'
 /**
   * @group Group A
   * Group description.
@@ -58,13 +58,13 @@ DOCBLOCK;
         $this->assertSame('Endpoint title.', $results['title']);
         $this->assertSame("Endpoint description.\nMultiline.", $results['description']);
 
-        $methodDocblock = <<<DOCBLOCK
+        $methodDocblock = <<<'DOCBLOCK'
 /**
   * Endpoint title.
   * @authenticated
   */
 DOCBLOCK;
-        $classDocblock = <<<DOCBLOCK
+        $classDocblock = <<<'DOCBLOCK'
 /**
   * @authenticated
   * @subgroup Scheiße
@@ -79,14 +79,14 @@ DOCBLOCK;
         $this->assertSame('Heilige Scheiße', $results['subgroupDescription']);
         $this->assertSame('', $results['groupDescription']);
         $this->assertSame('Endpoint title.', $results['title']);
-        $this->assertSame("", $results['description']);
+        $this->assertSame('', $results['description']);
     }
 
     /** @test */
     public function can_override_group_name_group_description_and_auth_status_from_method()
     {
         $strategy = new GetFromDocBlocks(new DocumentationConfig([]));
-        $methodDocblock = <<<DOCBLOCK
+        $methodDocblock = <<<'DOCBLOCK'
 /**
   * Endpoint title.
   * This is the endpoint description.
@@ -94,7 +94,7 @@ DOCBLOCK;
   * @group Group from method
   */
 DOCBLOCK;
-        $classDocblock = <<<DOCBLOCK
+        $classDocblock = <<<'DOCBLOCK'
 /**
   * @group Group from controller
   * This is the group description.
@@ -104,9 +104,8 @@ DOCBLOCK;
 
         $this->assertTrue($results['authenticated']);
         $this->assertSame('Group from method', $results['groupName']);
-        $this->assertSame("", $results['groupDescription']);
-        $this->assertSame("This is the endpoint description.", $results['description']);
-        $this->assertSame("Endpoint title.", $results['title']);
-
+        $this->assertSame('', $results['groupDescription']);
+        $this->assertSame('This is the endpoint description.', $results['description']);
+        $this->assertSame('Endpoint title.', $results['title']);
     }
 }

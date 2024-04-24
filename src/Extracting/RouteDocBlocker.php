@@ -46,7 +46,7 @@ class RouteDocBlocker
         $class = new ReflectionClass($className);
 
         if (! $class->hasMethod($methodName)) {
-            throw new \Exception("Error while fetching docblock for route ". c::getRouteRepresentation($route).": Class $className does not contain method $methodName");
+            throw new \Exception('Error while fetching docblock for route ' . c::getRouteRepresentation($route) . ": Class $className does not contain method $methodName");
         }
 
         $method = u::getReflectedRouteMethod([$className, $methodName]);
@@ -61,9 +61,7 @@ class RouteDocBlocker
     }
 
     /**
-     * @param string|object $classNameOrInstance
-     *
-     * @return string
+     * @param  string|object  $classNameOrInstance
      */
     protected static function normalizeClassName($classNameOrInstance): string
     {

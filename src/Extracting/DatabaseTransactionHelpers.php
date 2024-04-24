@@ -26,10 +26,11 @@ trait DatabaseTransactionHelpers
                 } catch (PDOException $e) {
                     throw new \Exception(
                         "Failed to connect to database connection '$connection'." .
-                        " Is the database running?" .
+                        ' Is the database running?' .
                         " If you aren't using this database, remove it from the `database_connections_to_transact` config array."
                     );
                 }
+
                 continue;
             } else {
                 $driverClassName = get_class($driver);
@@ -60,7 +61,7 @@ trait DatabaseTransactionHelpers
         $methods = ['beginTransaction', 'rollback'];
 
         foreach ($methods as $method) {
-            if (!method_exists($driver, $method)) {
+            if (! method_exists($driver, $method)) {
                 return false;
             }
         }
@@ -70,8 +71,6 @@ trait DatabaseTransactionHelpers
 
     /**
      * Returns an instance of the documentation config
-     *
-     * @return DocumentationConfig
      */
     abstract public function getConfig(): DocumentationConfig;
 }

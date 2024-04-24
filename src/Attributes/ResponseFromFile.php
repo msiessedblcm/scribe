@@ -18,10 +18,10 @@ class ResponseFromFile
 
     public function toArray()
     {
-        return  [
-            "status" => $this->status,
-            "description" => $this->description,
-            "content" => ResponseFileTools::getResponseContents($this->file, $this->merge)
+        return [
+            'status' => $this->status,
+            'description' => $this->description,
+            'content' => ResponseFileTools::getResponseContents($this->file, $this->merge),
         ];
     }
 }

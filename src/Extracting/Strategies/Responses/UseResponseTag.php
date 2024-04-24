@@ -17,17 +17,20 @@ class UseResponseTag extends Strategy
     public function __invoke(ExtractedEndpointData $endpointData, array $routeRules = []): ?array
     {
         $docBlocks = RouteDocBlocker::getDocBlocksFromRoute($endpointData->route);
+
         return $this->getDocBlockResponses($docBlocks['method']->getTags());
     }
 
     /**
-     * @param Tag[] $tags
+     * @param  Tag[]  $tags
      */
     public function getDocBlockResponses(array $tags): ?array
     {
         $responseTags = Utils::filterDocBlockTags($tags, 'response');
 
-        if (empty($responseTags)) return null;
+        if (empty($responseTags)) {
+            return null;
+        }
 
         $responses = array_map(function (Tag $responseTag) {
             // Status code (optional) followed by response
@@ -39,7 +42,7 @@ class UseResponseTag extends Strategy
             ['fields' => $fields, 'content' => $content] = a::parseIntoContentAndFields($content, ['status', 'scenario']);
 
             $status = $fields['status'] ?: $status;
-            $description = $fields['scenario'] ?: "";
+            $description = $fields['scenario'] ?: '';
 
             return ['content' => $content, 'status' => (int) $status, 'description' => $description];
         }, $responseTags);

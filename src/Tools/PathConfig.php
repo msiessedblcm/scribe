@@ -8,12 +8,11 @@ namespace Knuckles\Scribe\Tools;
 class PathConfig
 {
     public function __construct(
-        public string     $configName = 'scribe',
+        public string $configName = 'scribe',
         // FOr lack of a better name, we'll call this `scribeDir`.
         // It's sort of the cache dir, where Scribe stores its intermediate outputs.
         protected ?string $scribeDir = null
-    )
-    {
+    ) {
         if (is_null($this->scribeDir)) {
             $this->scribeDir = ".{$this->configName}";
         }

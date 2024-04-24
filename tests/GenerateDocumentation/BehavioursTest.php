@@ -70,6 +70,7 @@ class BehavioursTest extends BaseLaravelTest
 
     /**
      * @test
+     *
      * @see https://github.com/knuckleswtf/scribe/issues/53
      */
     public function can_process_closure_routes()
@@ -82,6 +83,7 @@ class BehavioursTest extends BaseLaravelTest
 
     /**
      * @group dingo
+     *
      * @test
      */
     public function can_process_routes_on_dingo()
@@ -126,7 +128,7 @@ class BehavioursTest extends BaseLaravelTest
             ],
         ], $paths);
 
-        Scribe::afterGenerating(fn() => null);
+        Scribe::afterGenerating(fn () => null);
     }
 
     /** @test */
@@ -134,7 +136,7 @@ class BehavioursTest extends BaseLaravelTest
     {
         $commandInstance = null;
 
-        Scribe::bootstrap(function (GenerateDocumentation $command) use (&$commandInstance){
+        Scribe::bootstrap(function (GenerateDocumentation $command) use (&$commandInstance) {
             $commandInstance = $command;
         });
 
@@ -144,7 +146,7 @@ class BehavioursTest extends BaseLaravelTest
 
         $this->assertTrue($commandInstance instanceof GenerateDocumentation);
 
-        Scribe::bootstrap(fn() => null);
+        Scribe::bootstrap(fn () => null);
     }
 
     /** @test */
@@ -172,7 +174,8 @@ class BehavioursTest extends BaseLaravelTest
     public function can_parse_resource_routes()
     {
         RouteFacade::resource('/api/users', TestResourceController::class)
-            ->only(['index', 'store']);
+            ->only(['index', 'store'])
+        ;
 
         $output = $this->generate();
 
@@ -212,23 +215,23 @@ class BehavioursTest extends BaseLaravelTest
     /** @test */
     public function checks_for_upgrades_after_run_unless_disabled()
     {
-        file_put_contents("config/scribe_test.php", str_replace("'logo' => false,", "", file_get_contents("config/scribe.php")));
-        config(["scribe_test" => require "config/scribe_test.php"]);
+        file_put_contents('config/scribe_test.php', str_replace("'logo' => false,", '', file_get_contents('config/scribe.php')));
+        config(['scribe_test' => require 'config/scribe_test.php']);
 
         $output = $this->artisan('scribe:generate', ['--config' => 'scribe_test']);
 
-        if (! FileFacade::exists(config_path("scribe.php"))) {
-            $this->assertStringContainsString("No config file to upgrade.", $output);
+        if (! FileFacade::exists(config_path('scribe.php'))) {
+            $this->assertStringContainsString('No config file to upgrade.', $output);
         } else {
-            $this->assertStringContainsString("Checking for any pending upgrades to your config file...", $output);
-            $this->assertStringContainsString("`logo` will be added", $output);
+            $this->assertStringContainsString('Checking for any pending upgrades to your config file...', $output);
+            $this->assertStringContainsString('`logo` will be added', $output);
         }
 
         $output = $this->artisan('scribe:generate', ['--config' => 'scribe_test', '--no-upgrade-check' => true]);
-        $this->assertStringNotContainsString("Checking for any pending upgrades to your config file...", $output);
+        $this->assertStringNotContainsString('Checking for any pending upgrades to your config file...', $output);
 
-        unlink("config/scribe_test.php");
-        Utils::deleteDirectoryAndContents(".scribe_test");
+        unlink('config/scribe_test.php');
+        Utils::deleteDirectoryAndContents('.scribe_test');
     }
 
     /** @test */

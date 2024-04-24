@@ -19,12 +19,13 @@ class ConsoleOutputUtils
         self::$clara = clara('knuckleswtf/scribe', \Shalvah\Clara\Clara::MODE_ICONS)
             ->showDebugOutput($showDebug)
             ->useOutput($outputInterface)
-            ->only();
+            ->only()
+        ;
     }
 
     public static function deprecated($feature, $inVersion, $should = null)
     {
-        if (!self::$clara) {
+        if (! self::$clara) {
             self::bootstrapOutput(new ConsoleOutput);
         }
 
@@ -39,7 +40,7 @@ class ConsoleOutputUtils
 
     public static function warn($message)
     {
-        if (!self::$clara) {
+        if (! self::$clara) {
             self::bootstrapOutput(new ConsoleOutput);
         }
         self::$clara->warn($message);
@@ -47,7 +48,7 @@ class ConsoleOutputUtils
 
     public static function info($message)
     {
-        if (!self::$clara) {
+        if (! self::$clara) {
             self::bootstrapOutput(new ConsoleOutput);
         }
         self::$clara->info($message);
@@ -55,7 +56,7 @@ class ConsoleOutputUtils
 
     public static function debug($message)
     {
-        if (!self::$clara) {
+        if (! self::$clara) {
             self::bootstrapOutput(new ConsoleOutput);
         }
         self::$clara->debug($message);
@@ -63,7 +64,7 @@ class ConsoleOutputUtils
 
     public static function success($message)
     {
-        if (!self::$clara) {
+        if (! self::$clara) {
             self::bootstrapOutput(new ConsoleOutput);
         }
         self::$clara->success($message);
@@ -71,7 +72,7 @@ class ConsoleOutputUtils
 
     public static function error($message)
     {
-        if (!self::$clara) {
+        if (! self::$clara) {
             self::bootstrapOutput(new ConsoleOutput);
         }
         self::$clara->error($message);
@@ -79,9 +80,6 @@ class ConsoleOutputUtils
 
     /**
      * Return a string representation of a route to output to the console eg [GET] /api/users
-     * @param Route $route
-     *
-     * @return string
      */
     public static function getRouteRepresentation(Route $route): string
     {
@@ -92,6 +90,7 @@ class ConsoleOutputUtils
 
         $routeMethods = implode(',', $methods);
         $routePath = $route->uri();
+
         return "[$routeMethods] $routePath";
     }
 }

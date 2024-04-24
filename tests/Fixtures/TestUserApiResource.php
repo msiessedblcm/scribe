@@ -13,12 +13,11 @@ class TestUserApiResource extends JsonResource
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
-     *
      * @return array
      */
     public function toArray($request)
     {
-        if($request->route()->named('someone')) {
+        if ($request->route()->named('someone')) {
             return ['someone' => true];
         }
 

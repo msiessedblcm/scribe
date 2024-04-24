@@ -5,11 +5,10 @@ namespace Knuckles\Camel;
 use Illuminate\Contracts\Support\Arrayable;
 use Spatie\DataTransferObject\DataTransferObject;
 
-
 class BaseDTO extends DataTransferObject implements Arrayable, \ArrayAccess
 {
     /**
-     * @var array $custom
+     * @var array
      * Added so end-users can dynamically add additional properties for their own use.
      */
     public array $custom = [];

@@ -25,9 +25,9 @@ class ApiDetails
     private array $lastKnownFileContentHashes = [];
 
     public function __construct(
-        PathConfig          $paths,
+        PathConfig $paths,
         DocumentationConfig $config = null,
-        bool                $preserveUserChanges = true
+        bool $preserveUserChanges = true
     ) {
         $this->markdownOutputPath = $paths->intermediateOutputPath(); //.scribe by default
         // If no config is injected, pull from global. Makes testing easier.
@@ -43,7 +43,7 @@ class ApiDetails
     {
         c::info('Extracting intro and auth Markdown files to: ' . $this->markdownOutputPath);
 
-        if (!is_dir($this->markdownOutputPath)) {
+        if (! is_dir($this->markdownOutputPath)) {
             mkdir($this->markdownOutputPath, 0777, true);
         }
 
@@ -63,6 +63,7 @@ class ApiDetails
         if ($this->hasFileBeenModified($introMarkdownFile)) {
             if ($this->preserveUserChanges) {
                 c::warn("Skipping modified file $introMarkdownFile");
+
                 return;
             }
 
@@ -72,7 +73,8 @@ class ApiDetails
         $introMarkdown = view('scribe::markdown.intro')
             ->with('description', $this->config->get('description', ''))
             ->with('introText', $this->config->get('intro_text', ''))
-            ->with('baseUrl', $this->baseUrl)->render();
+            ->with('baseUrl', $this->baseUrl)->render()
+        ;
         $this->writeMarkdownFileAndRecordHash($introMarkdownFile, $introMarkdown);
     }
 
@@ -82,6 +84,7 @@ class ApiDetails
         if ($this->hasFileBeenModified($authMarkdownFile)) {
             if ($this->preserveUserChanges) {
                 c::warn("Skipping modified file $authMarkdownFile");
+
                 return;
             }
 
@@ -95,11 +98,13 @@ class ApiDetails
         if ($isAuthed) {
             $strategy = $this->config->get('auth.in');
             $parameterName = $this->config->get('auth.name');
-            $authDescription = u::trans("scribe::auth.instruction.$strategy", [
-                'parameterName' => $parameterName,
-                'placeholder' => $this->config->get('auth.placeholder') ?: 'your-token']
+            $authDescription = u::trans(
+                "scribe::auth.instruction.$strategy",
+                [
+                    'parameterName' => $parameterName,
+                    'placeholder' => $this->config->get('auth.placeholder') ?: 'your-token']
             );
-            $authDescription .= "\n\n".u::trans("scribe::auth.details");
+            $authDescription .= "\n\n" . u::trans('scribe::auth.details');
             $extraInfo = $this->config->get('auth.extra_info', '');
         }
 
@@ -111,8 +116,6 @@ class ApiDetails
         $this->writeMarkdownFileAndRecordHash($authMarkdownFile, $authMarkdown);
     }
 
-    /**
-     */
     protected function writeMarkdownFileAndRecordHash(string $filePath, string $markdown): void
     {
         file_put_contents($filePath, $markdown);
@@ -124,13 +127,14 @@ class ApiDetails
         $content = "# GENERATED. YOU SHOULDN'T MODIFY OR DELETE THIS FILE.\n";
         $content .= "# Scribe uses this file to know when you change something manually in your docs.\n";
         $content .= collect($this->lastKnownFileContentHashes)
-            ->map(fn($hash, $filePath) => "$filePath=$hash")->implode("\n");
+            ->map(fn ($hash, $filePath) => "$filePath=$hash")->implode("\n")
+        ;
         file_put_contents($this->fileHashesTrackingFile, $content);
     }
 
     protected function hasFileBeenModified(string $filePath): bool
     {
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             return false;
         }
 
@@ -156,9 +160,11 @@ class ApiDetails
             array_shift($lastKnownFileHashes);
             $this->lastKnownFileContentHashes = collect($lastKnownFileHashes)
                 ->mapWithKeys(function ($line) {
-                    [$filePath, $hash] = explode("=", $line);
+                    [$filePath, $hash] = explode('=', $line);
+
                     return [$filePath => $hash];
-                })->toArray();
+                })->toArray()
+            ;
         }
     }
 }

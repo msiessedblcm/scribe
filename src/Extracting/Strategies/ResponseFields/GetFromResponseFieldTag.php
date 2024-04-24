@@ -6,8 +6,8 @@ use Knuckles\Scribe\Extracting\Shared\ResponseFieldTools;
 use Knuckles\Scribe\Extracting\Strategies\GetFieldsFromTagStrategy;
 use Knuckles\Scribe\Extracting\Strategies\Responses\UseApiResourceTags;
 use Knuckles\Scribe\Tools\AnnotationParser as a;
-use Mpociot\Reflection\DocBlock;
 use Knuckles\Scribe\Tools\Utils as u;
+use Mpociot\Reflection\DocBlock;
 
 class GetFromResponseFieldTag extends GetFieldsFromTagStrategy
 {
@@ -35,7 +35,7 @@ class GetFromResponseFieldTag extends GetFieldsFromTagStrategy
 
         // Support optional type in annotation
         // The type can also be a union or nullable type (eg ?string or string|null)
-        if (!$this->isSupportedTypeInDocBlocks(explode('|', trim($type, '?'))[0])) {
+        if (! $this->isSupportedTypeInDocBlocks(explode('|', trim($type, '?'))[0])) {
             // Then that wasn't a type, but part of the description
             $data['description'] = trim("$type $description");
             $data['type'] = '';
@@ -57,8 +57,8 @@ class GetFromResponseFieldTag extends GetFieldsFromTagStrategy
             })
         );
 
-        if (!empty($apiResourceTags) &&
-            !empty($className = $this->getClassNameFromApiResourceTag($apiResourceTags[0]->getContent()))
+        if (! empty($apiResourceTags) &&
+            ! empty($className = $this->getClassNameFromApiResourceTag($apiResourceTags[0]->getContent()))
         ) {
             $method = u::getReflectedRouteMethod([$className, 'toArray']);
             $docBlock = new DocBlock($method->getDocComment() ?: '');
@@ -71,6 +71,7 @@ class GetFromResponseFieldTag extends GetFieldsFromTagStrategy
     public function getClassNameFromApiResourceTag(string $apiResourceTag): string
     {
         ['content' => $className] = a::parseIntoContentAndFields($apiResourceTag, UseApiResourceTags::apiResourceAllowedFields());
+
         return $className;
     }
 }

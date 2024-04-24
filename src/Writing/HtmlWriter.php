@@ -18,8 +18,11 @@ use Knuckles\Scribe\Tools\WritingUtils;
 class HtmlWriter
 {
     protected DocumentationConfig $config;
+
     protected string $baseUrl;
+
     protected string $assetPathPrefix;
+
     protected MarkdownParser $markdownParser;
 
     public function __construct(DocumentationConfig $config = null)
@@ -49,7 +52,7 @@ class HtmlWriter
         $headingsAfterEndpoints = $this->markdownParser->headings;
 
         foreach ($groupedEndpoints as &$group) {
-                $group['subgroups'] = collect($group['endpoints'])->groupBy('metadata.subgroup')->all();
+            $group['subgroups'] = collect($group['endpoints'])->groupBy('metadata.subgroup')->all();
         }
         $theme = $this->config->get('theme') ?? 'default';
         $output = View::make("scribe::themes.$theme.index", [
@@ -64,7 +67,7 @@ class HtmlWriter
             'assetPathPrefix' => $this->assetPathPrefix,
         ])->render();
 
-        if (!is_dir($destinationFolder)) {
+        if (! is_dir($destinationFolder)) {
             mkdir($destinationFolder, 0777, true);
         }
 
@@ -93,7 +96,7 @@ class HtmlWriter
 
         foreach ($assets as $path => [$destination, $fileName]) {
             if (file_exists($path)) {
-                if (!is_dir($destination)) {
+                if (! is_dir($destination)) {
                     mkdir($destination, 0777, true);
                 }
                 copy($path, $destination . $fileName);
@@ -113,11 +116,11 @@ class HtmlWriter
 
         // NB:These paths are wrong for laravel type but will be set correctly by the Writer class
         if ($this->config->get('postman.enabled', true)) {
-            $links[] = "<a href=\"{$this->assetPathPrefix}collection.json\">".u::trans("scribe::links.postman")."</a>";
+            $links[] = "<a href=\"{$this->assetPathPrefix}collection.json\">" . u::trans('scribe::links.postman') . '</a>';
             $postmanCollectionUrl = "{$this->assetPathPrefix}collection.json";
         }
         if ($this->config->get('openapi.enabled', false)) {
-            $links[] = "<a href=\"{$this->assetPathPrefix}openapi.yaml\">".u::trans("scribe::links.openapi")."</a>";
+            $links[] = "<a href=\"{$this->assetPathPrefix}openapi.yaml\">" . u::trans('scribe::links.openapi') . '</a>';
             $openApiSpecUrl = "{$this->assetPathPrefix}openapi.yaml";
         }
 
@@ -140,8 +143,8 @@ class HtmlWriter
             'last_updated' => $this->getLastUpdated(),
             'auth' => $auth,
             'try_it_out' => $this->config->get('try_it_out'),
-            "postman_collection_url" => $postmanCollectionUrl ?? null,
-            "openapi_spec_url" => $openApiSpecUrl ?? null,
+            'postman_collection_url' => $postmanCollectionUrl ?? null,
+            'openapi_spec_url' => $openApiSpecUrl ?? null,
             'links' => array_merge($links, ['<a href="http://github.com/knuckleswtf/scribe">Documentation powered by Scribe ✍</a>']),
         ];
     }
@@ -151,17 +154,17 @@ class HtmlWriter
         $lastUpdated = $this->config->get('last_updated', 'Last updated: {date:F j, Y}');
 
         $tokens = [
-            "date" => fn($format) => date($format),
-            "git" => fn($format) => match ($format) {
-                "short" => trim(shell_exec('git rev-parse --short HEAD')),
-                "long" => trim(shell_exec('git rev-parse HEAD')),
+            'date' => fn ($format) => date($format),
+            'git' => fn ($format) => match ($format) {
+                'short' => trim(shell_exec('git rev-parse --short HEAD')),
+                'long' => trim(shell_exec('git rev-parse HEAD')),
                 default => throw new InvalidArgumentException("The `git` token only supports formats 'short' and 'long', but you specified $format"),
             },
         ];
 
         foreach ($tokens as $token => $resolver) {
             $matches = [];
-            if(preg_match('#(\{'.$token.':(.+?)})#', $lastUpdated, $matches)) {
+            if (preg_match('#(\{' . $token . ':(.+?)})#', $lastUpdated, $matches)) {
                 $lastUpdated = str_replace($matches[1], $resolver($matches[2]), $lastUpdated);
             }
         }
@@ -179,11 +182,11 @@ class HtmlWriter
                 'slug' => $heading['slug'],
                 'name' => $heading['text'],
                 'subheadings' => [],
-            ];;
+            ];
             if ($heading['level'] === 1) {
                 $headings[] = $element;
                 $lastL1ElementIndex = count($headings) - 1;
-            } elseif ($heading['level'] === 2 && !is_null($lastL1ElementIndex)) {
+            } elseif ($heading['level'] === 2 && ! is_null($lastL1ElementIndex)) {
                 $headings[$lastL1ElementIndex]['subheadings'][] = $element;
             }
         }
@@ -195,11 +198,11 @@ class HtmlWriter
                 'slug' => $groupSlug,
                 'name' => $group['name'],
                 'subheadings' => collect($group['subgroups'])->flatMap(function ($endpoints, $subgroupName) use ($groupSlug) {
-                    if ($subgroupName === "") {
-                        return $endpoints->map(fn(OutputEndpointData $endpoint) => [
+                    if ($subgroupName === '') {
+                        return $endpoints->map(fn (OutputEndpointData $endpoint) => [
                             'slug' => $endpoint->fullSlug(),
                             'name' => $endpoint->name(),
-                            'subheadings' => []
+                            'subheadings' => [],
                         ])->values();
                     }
 
@@ -207,10 +210,10 @@ class HtmlWriter
                         [
                             'slug' => "$groupSlug-" . Str::slug($subgroupName),
                             'name' => $subgroupName,
-                            'subheadings' => $endpoints->map(fn($endpoint) => [
+                            'subheadings' => $endpoints->map(fn ($endpoint) => [
                                 'slug' => $endpoint->fullSlug(),
                                 'name' => $endpoint->name(),
-                                'subheadings' => []
+                                'subheadings' => [],
                             ])->values(),
                         ],
                     ];
@@ -224,11 +227,11 @@ class HtmlWriter
                 'slug' => $heading['slug'],
                 'name' => $heading['text'],
                 'subheadings' => [],
-            ];;
+            ];
             if ($heading['level'] === 1) {
                 $headings[] = $element;
                 $lastL1ElementIndex = count($headings) - 1;
-            } elseif ($heading['level'] === 2 && !is_null($lastL1ElementIndex)) {
+            } elseif ($heading['level'] === 2 && ! is_null($lastL1ElementIndex)) {
                 $headings[$lastL1ElementIndex]['subheadings'][] = $element;
             }
         }

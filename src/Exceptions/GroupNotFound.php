@@ -11,7 +11,6 @@ class GroupNotFound extends \RuntimeException implements ScribeException
 You specified the group "$groupName" in a "$tag" field in one of your custom endpoints, but we couldn't find that group.
 Did you rename the group?
 MESSAGE
-
         );
     }
 }

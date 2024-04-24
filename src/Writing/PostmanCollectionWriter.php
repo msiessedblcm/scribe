@@ -28,9 +28,7 @@ class PostmanCollectionWriter
     }
 
     /**
-     * @param array[] $groupedEndpoints
-     *
-     * @return array
+     * @param  array[]  $groupedEndpoints
      */
     public function generatePostmanCollection(array $groupedEndpoints): array
     {
@@ -48,7 +46,7 @@ class PostmanCollectionWriter
                 'name' => $this->config->get('title') ?: config('app.name'),
                 '_postman_id' => Uuid::uuid4()->toString(),
                 'description' => $this->config->get('description', ''),
-                'schema' => "https://schema.getpostman.com/json/collection/v" . self::SPEC_VERSION . "/collection.json",
+                'schema' => 'https://schema.getpostman.com/json/collection/v' . self::SPEC_VERSION . '/collection.json',
             ],
             'item' => array_values(array_map(function (array $group) {
                 return [
@@ -65,22 +63,22 @@ class PostmanCollectionWriter
 
     protected function generateAuthObject(): array
     {
-        if (!$this->config->get('auth.enabled')) {
+        if (! $this->config->get('auth.enabled')) {
             return [
                 'type' => 'noauth',
             ];
         }
 
         return match ($this->config->get('auth.in')) {
-            "basic" => [
+            'basic' => [
                 'type' => 'basic',
             ],
-            "bearer" => [
+            'bearer' => [
                 'type' => 'bearer',
                 'bearer' => [
                     [
-                        'key'   => $this->config->get('auth.name'),
-                        'type'  => 'string',
+                        'key' => $this->config->get('auth.name'),
+                        'type' => 'string',
                     ],
                 ],
             ],
@@ -108,7 +106,7 @@ class PostmanCollectionWriter
         $items = [];
         /** @var OutputEndpointData $endpoint */
         foreach ($group['endpoints'] as $endpoint) {
-            if (!$endpoint->metadata->subgroup) {
+            if (! $endpoint->metadata->subgroup) {
                 $items[] = $this->generateEndpointItem($endpoint);
             } else {
                 if (isset($seenSubgroups[$endpoint->metadata->subgroup])) {
@@ -125,6 +123,7 @@ class PostmanCollectionWriter
                 }
             }
         }
+
         return $items;
     }
 
@@ -145,7 +144,7 @@ class PostmanCollectionWriter
         }
 
         $endpointItem = [
-            'name' => $endpoint->metadata->title !== '' ? $endpoint->metadata->title : ($endpoint->httpMethods[0].' '.$endpoint->uri),
+            'name' => $endpoint->metadata->title !== '' ? $endpoint->metadata->title : ($endpoint->httpMethods[0] . ' ' . $endpoint->uri),
             'request' => [
                 'url' => $this->generateUrlObject($endpoint),
                 'method' => $method,
@@ -155,7 +154,6 @@ class PostmanCollectionWriter
             ],
             'response' => $this->getResponses($endpoint),
         ];
-
 
         if ($endpoint->metadata->authenticated === false) {
             $endpointItem['request']['auth'] = ['type' => 'noauth'];
@@ -180,7 +178,9 @@ class PostmanCollectionWriter
             case 'formdata':
             case 'urlencoded':
                 $body[$inputMode] = $this->getFormDataParams(
-                    $endpoint->cleanBodyParameters, null, $endpoint->bodyParameters
+                    $endpoint->cleanBodyParameters,
+                    null,
+                    $endpoint->bodyParameters
                 );
                 foreach ($endpoint->fileParameters as $key => $value) {
                     while (is_array($value)) {
@@ -190,7 +190,7 @@ class PostmanCollectionWriter
                             $key .= '[]';
                             $value = $value[0];
                         } else {
-                            $key .= '['.$keys[0].']';
+                            $key .= '[' . $keys[0] . ']';
                             $value = $value[$keys[0]];
                         }
                     }
@@ -206,20 +206,21 @@ class PostmanCollectionWriter
             default:
                 $body[$inputMode] = json_encode($endpoint->cleanBodyParameters, JSON_UNESCAPED_UNICODE);
         }
+
         return $body;
     }
 
     /**
      * Format form-data parameters correctly for arrays eg. data[item][index] = value
      */
-    protected function getFormDataParams(array $paramsKeyValue, ?string $key = null, array $paramsFullDetails = []): array
+    protected function getFormDataParams(array $paramsKeyValue, string $key = null, array $paramsFullDetails = []): array
     {
         $body = [];
 
         foreach ($paramsKeyValue as $index => $value) {
             $index = $key ? ($key . '[' . $index . ']') : $index;
 
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $body[] = [
                     'key' => $index,
                     'value' => $value,
@@ -253,13 +254,15 @@ class PostmanCollectionWriter
                 // Allow users to write ['header' => '@{{value}}'] in config
                 // and have it rendered properly as {{value}} in the Postman collection.
                 $value = str_replace('@{{', '{{', $value);
+
                 return [
                     'key' => $header,
                     'value' => $value,
                 ];
             })
             ->values()
-            ->all();
+            ->all()
+        ;
 
         return $headers;
     }
@@ -296,7 +299,7 @@ class PostmanCollectionWriter
                         'value' => $value,
                         'description' => strip_tags($parameterData->description),
                         // Default query params to disabled if they aren't required and have empty values
-                        'disabled' => !$parameterData->required && empty($parameterData->example),
+                        'disabled' => ! $parameterData->required && empty($parameterData->example),
                     ];
                 }
                 // If there are no values, add one entry so the parameter shows up in the Postman UI.
@@ -315,7 +318,7 @@ class PostmanCollectionWriter
                     'value' => $parameterData->example != null ? urlencode($parameterData->example) : '',
                     'description' => strip_tags($parameterData->description),
                     // Default query params to disabled if they aren't required and have empty values
-                    'disabled' => !$parameterData->required && empty($parameterData->example),
+                    'disabled' => ! $parameterData->required && empty($parameterData->example),
                 ];
             }
         }
@@ -347,7 +350,7 @@ class PostmanCollectionWriter
 
     private function getAuthParamToExclude(): array
     {
-        if (!$this->config->get('auth.enabled')) {
+        if (! $this->config->get('auth.enabled')) {
             return [null, null];
         }
 
@@ -380,17 +383,18 @@ class PostmanCollectionWriter
 
     protected function getResponseDescription(Response $response): string
     {
-        if (Str::startsWith($response->content, "<<binary>>")) {
-            return trim(str_replace("<<binary>>", "", $response->content));
+        if (Str::startsWith($response->content, '<<binary>>')) {
+            return trim(str_replace('<<binary>>', '', $response->content));
         }
 
         $description = strval($response->description);
         // Don't include the status code in description; see https://github.com/knuckleswtf/scribe/issues/271
         if (preg_match("/\d{3},\s+(.+)/", $description, $matches)) {
             $description = $matches[1];
-        } else if ($description === strval($response->status)) {
+        } elseif ($description === strval($response->status)) {
             $description = '';
         }
+
         return $description;
     }
 }

@@ -2,8 +2,6 @@
 
 namespace Knuckles\Scribe\Extracting\Strategies\Responses;
 
-use Illuminate\Support\Facades\Config;
-use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Dingo\Api\Dispatcher;
 use Dingo\Api\Routing\Route as DingoRoute;
 use Exception;
@@ -12,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
+use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Extracting\DatabaseTransactionHelpers;
 use Knuckles\Scribe\Extracting\ParamHelpers;
 use Knuckles\Scribe\Extracting\Strategies\Strategy;
@@ -37,7 +37,7 @@ class ResponseCalls extends Strategy
 
     public function makeResponseCallIfConditionsPass(ExtractedEndpointData $endpointData, array $settings): ?array
     {
-        if (!$this->shouldMakeApiCall($endpointData)) {
+        if (! $this->shouldMakeApiCall($endpointData)) {
             return null;
         }
 
@@ -74,15 +74,26 @@ class ResponseCalls extends Strategy
         $hardcodedFileParams = $settings['fileParams'] ?? [];
         $hardcodedFileParams = collect($hardcodedFileParams)->map(function ($filePath) {
             $fileName = basename($filePath);
+
             return new UploadedFile(
-                $filePath, $fileName, mime_content_type($filePath), 0, false
+                $filePath,
+                $fileName,
+                mime_content_type($filePath),
+                0,
+                false
             );
         })->toArray();
         $fileParameters = array_merge($endpointData->fileParameters, $hardcodedFileParams);
 
         $request = $this->prepareRequest(
-            $endpointData->route, $endpointData->uri, $settings, $urlParameters,
-            $bodyParameters, $queryParameters, $fileParameters, $headers
+            $endpointData->route,
+            $endpointData->uri,
+            $settings,
+            $urlParameters,
+            $bodyParameters,
+            $queryParameters,
+            $fileParameters,
+            $headers
         );
 
         $this->runPreRequestHook($request, $endpointData);
@@ -109,8 +120,6 @@ class ResponseCalls extends Strategy
     }
 
     /**
-     * @param array $settings
-     *
      * @return void
      */
     private function configureEnvironment(array $settings)
@@ -119,23 +128,16 @@ class ResponseCalls extends Strategy
         $this->setLaravelConfigs($settings['config'] ?? []);
     }
 
-    /**
-     * @param Route $route
-     * @param array $settings
-     * @param array $urlParams
-     * @param array $bodyParams
-     * @param array $queryParams
-     *
-     * @param array $fileParameters
-     * @param array $headers
-     *
-     * @return Request
-     */
     protected function prepareRequest(
-        Route $route, string $url, array $settings, array $urlParams,
-        array $bodyParams, array $queryParams, array $fileParameters, array $headers
-    ): Request
-    {
+        Route $route,
+        string $url,
+        array $settings,
+        array $urlParams,
+        array $bodyParams,
+        array $queryParams,
+        array $fileParameters,
+        array $headers
+    ): Request {
         $uri = Utils::getUrlWithBoundParameters($url, $urlParams);
         $routeMethods = $this->getMethods($route);
         $method = array_shift($routeMethods);
@@ -152,8 +154,13 @@ class ResponseCalls extends Strategy
         // Always use the current app domain for response calls
         $rootUrl = config('app.url');
         $request = Request::create(
-            "$rootUrl/$uri", $method, [], $cookies, $fileParameters,
-            $this->transformHeadersToServerVars($headers), json_encode($bodyParams)
+            "$rootUrl/$uri",
+            $method,
+            [],
+            $cookies,
+            $fileParameters,
+            $this->transformHeadersToServerVars($headers),
+            json_encode($bodyParams)
         );
         // Add headers again to catch any ones we didn't transform properly.
         $this->addHeaders($request, $route, $headers);
@@ -196,8 +203,6 @@ class ResponseCalls extends Strategy
     }
 
     /**
-     * @param Request $request
-     *
      * @return \Illuminate\Http\JsonResponse|mixed
      */
     public function callDingoRoute(Request $request, Route $route)
@@ -213,12 +218,13 @@ class ResponseCalls extends Strategy
 
         // set domain and body parameters
         $dispatcher->on($request->header('SERVER_NAME'))
-            ->with($request->request->all());
+            ->with($request->request->all())
+        ;
 
         // set URL and query parameters
         $uri = $request->getRequestUri();
         $query = $request->getQueryString();
-        if (!empty($query)) {
+        if (! empty($query)) {
             $uri .= "?$query";
         }
 
@@ -229,7 +235,7 @@ class ResponseCalls extends Strategy
 
         // the response from the Dingo dispatcher is the 'raw' response from the controller,
         // so we have to ensure it's JSON first
-        if (!$response instanceof Response) {
+        if (! $response instanceof Response) {
             $response = response()->json($response);
         }
 
@@ -273,11 +279,8 @@ class ResponseCalls extends Strategy
     }
 
     /**
-     * @param Request $request
-     *
-     * @param Route $route
-     *
      * @return \Illuminate\Http\JsonResponse|mixed|\Symfony\Component\HttpFoundation\Response
+     *
      * @throws Exception
      */
     protected function makeApiCall(Request $request, Route $route)
@@ -331,7 +334,7 @@ class ResponseCalls extends Strategy
         $prefix = 'HTTP_';
         foreach ($headers as $name => $value) {
             $name = strtr(strtoupper($name), '-', '_');
-            if (!Str::startsWith($name, $prefix) && $name !== 'CONTENT_TYPE') {
+            if (! Str::startsWith($name, $prefix) && $name !== 'CONTENT_TYPE') {
                 $name = $prefix . $name;
             }
             $server[$name] = $value;
@@ -353,16 +356,15 @@ class ResponseCalls extends Strategy
     }
 
     /**
-     * @param array $only The routes which this strategy should be applied to. Can not be specified with $except.
+     * @param  array  $only The routes which this strategy should be applied to. Can not be specified with $except.
      *   Specify route names ("users.index", "users.*"), or method and path ("GET *", "POST /safe/*").
-     * @param array $except The routes which this strategy should be applied to. Can not be specified with $only.
+     * @param  array  $except The routes which this strategy should be applied to. Can not be specified with $only.
      *   Specify route names ("users.index", "users.*"), or method and path ("GET *", "POST /safe/*").
-     * @param array $config Any extra Laravel config() values to before starting the response call.
-     * @param array $queryParams Query params to always send with the response call. Key-value array.
-     * @param array $bodyParams Body params to always send with the response call. Key-value array.
-     * @param array $fileParams File params to always send with the response call. Key-value array. Key is param name, value is file path.
-     * @param array $cookies Cookies to always send with the response call. Key-value array.
-     * @return array
+     * @param  array  $config Any extra Laravel config() values to before starting the response call.
+     * @param  array  $queryParams Query params to always send with the response call. Key-value array.
+     * @param  array  $bodyParams Body params to always send with the response call. Key-value array.
+     * @param  array  $fileParams File params to always send with the response call. Key-value array. Key is param name, value is file path.
+     * @param  array  $cookies Cookies to always send with the response call. Key-value array.
      */
     public static function withSettings(
         array $only = ['GET *'],
@@ -374,8 +376,7 @@ class ResponseCalls extends Strategy
             // 'key' => 'storage/app/image.png',
         ],
         array $cookies = [],
-    ): array
-    {
+    ): array {
         return static::wrapWithSettings(...get_defined_vars());
     }
 }

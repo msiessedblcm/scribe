@@ -26,7 +26,6 @@ class TestResourceController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      *
      * @return \Illuminate\Http\Response
      */
@@ -42,7 +41,6 @@ class TestResourceController extends Controller
      * }
      *
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -55,9 +53,7 @@ class TestResourceController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -68,7 +64,6 @@ class TestResourceController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     *
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

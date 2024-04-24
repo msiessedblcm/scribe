@@ -2,9 +2,9 @@
 
 namespace Knuckles\Scribe\Extracting\Strategies\UrlParameters;
 
-use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use FastRoute\RouteParser\Std;
 use Illuminate\Support\Arr;
+use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Extracting\ParamHelpers;
 use Knuckles\Scribe\Extracting\Strategies\Strategy;
 use Knuckles\Scribe\Tools\Utils;
@@ -15,7 +15,7 @@ class GetFromLumenAPI extends Strategy
 
     public function __invoke(ExtractedEndpointData $endpointData, array $routeRules = []): ?array
     {
-        if (!Utils::isLumen()) {
+        if (! Utils::isLumen()) {
             return null;
         }
 
@@ -27,7 +27,7 @@ class GetFromLumenAPI extends Strategy
         $possibilityWithAllSegmentsPresent = end($possibilities);
 
         foreach ($possibilityWithAllSegmentsPresent as $part) {
-            if (!is_array($part)) {
+            if (! is_array($part)) {
                 // It's just a path segment, not a URL parameter'
                 continue;
             }
@@ -36,19 +36,20 @@ class GetFromLumenAPI extends Strategy
             $isThisParameterOptional = Arr::first($possibilities, function ($possibility) use ($name) {
                 // This function checks if this parameter is present in the current possibility
                 return (function () use ($possibility, $name) {
-                        foreach ($possibility as $part) {
-                            if (is_array($part) && $part[0] === $name) {
-                                return true;
-                            }
+                    foreach ($possibility as $part) {
+                        if (is_array($part) && $part[0] === $name) {
+                            return true;
                         }
-                        return false;
-                    })() === false;
+                    }
+
+                    return false;
+                })() === false;
             }, false);
             $type = 'string';
             $parameters[$name] = [
                 'name' => $name,
                 'description' => '',
-                'required' => !boolval($isThisParameterOptional),
+                'required' => ! boolval($isThisParameterOptional),
                 'example' => $this->generateDummyValue($type, hints: ['name' => $name]),
                 'type' => $type,
             ];

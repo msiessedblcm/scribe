@@ -13,24 +13,22 @@ class ResponseFromApiResource
         public string $name,
         public ?string $model = null,
         public int $status = 200,
-        public ?string $key = "data",
+        public ?string $key = 'data',
         public ?string $description = '',
 
         /* Mark if this should be used as a collection. Only needed if not using a ResourceCollection. */
         public ?bool $collection = null,
         public array $factoryStates = [],
         public array $with = [],
-
         public ?int $paginate = null,
         public ?int $simplePaginate = null,
         public array $additional = [],
-    )
-    {
+    ) {
     }
 
     public function modelToBeTransformed(): ?string
     {
-        if (!empty($this->model)) {
+        if (! empty($this->model)) {
             return $this->model;
         }
 
@@ -39,11 +37,12 @@ class ResponseFromApiResource
 
     public function isCollection(): bool
     {
-        if (!is_null($this->collection)) {
+        if (! is_null($this->collection)) {
             return $this->collection;
         }
 
         $className = $this->name;
+
         return (new $className(new \Illuminate\Http\Resources\MissingValue)) instanceof ResourceCollection;
     }
 }

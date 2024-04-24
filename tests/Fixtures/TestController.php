@@ -100,6 +100,7 @@ class TestController extends Controller
     public function withFormDataParams()
     {
         request()->validate(['image' => 'file|required']);
+
         return [
             'filename' => request()->file('image')->getFilename(),
             'filepath' => request()->file('image')->getPath(),
@@ -161,6 +162,7 @@ class TestController extends Controller
     /**
      * @bodyParam included string required Exists in examples. Example: 'Here'
      * @bodyParam  excluded_body_param int Does not exist in examples. No-example
+     *
      * @queryParam excluded_query_param Does not exist in examples. No-example
      */
     public function withExcludedExamples()
@@ -170,6 +172,7 @@ class TestController extends Controller
 
     /**
      * @authenticated
+     *
      * @responseField user_id string The ID of the newly created user
      * @responseField creator_id string The ID of the creator
      */
@@ -189,6 +192,7 @@ class TestController extends Controller
 
     /**
      * @apiResource \Knuckles\Scribe\Tests\Fixtures\TestUserApiResource
+     *
      * @apiResourceModel \Knuckles\Scribe\Tests\Fixtures\TestUser
      */
     public function withEloquentApiResource()
@@ -208,6 +212,7 @@ class TestController extends Controller
      * @group Other😎
      *
      * @apiResourceCollection Knuckles\Scribe\Tests\Fixtures\TestUserApiResource
+     *
      * @apiResourceModel Knuckles\Scribe\Tests\Fixtures\TestUser
      */
     public function withEloquentApiResourceCollection()
@@ -221,6 +226,7 @@ class TestController extends Controller
      * @group Other😎
      *
      * @apiResourceCollection Knuckles\Scribe\Tests\Fixtures\TestUserApiResourceCollection
+     *
      * @apiResourceModel Knuckles\Scribe\Tests\Fixtures\TestUser
      */
     public function withEloquentApiResourceCollectionClass()
@@ -277,6 +283,7 @@ class TestController extends Controller
 
     /**
      * @authenticated
+     *
      * @urlparam id Example: 3
      */
     public function echoesRequestValues($id)
@@ -368,6 +375,7 @@ class TestController extends Controller
 
     /**
      * @transformer \Knuckles\Scribe\Tests\Fixtures\TestTransformer
+     *
      * @transformermodel \Knuckles\Scribe\Tests\Fixtures\TestModel
      */
     public function transformerTagWithModel()
@@ -385,6 +393,7 @@ class TestController extends Controller
 
     /**
      * @transformercollection \Knuckles\Scribe\Tests\Fixtures\TestTransformer
+     *
      * @transformermodel \Knuckles\Scribe\Tests\Fixtures\TestModel
      */
     public function transformerCollectionTagWithModel()
@@ -527,7 +536,6 @@ class TestController extends Controller
 
         // Do stuff
         if ($validator->fails()) {
-
         }
     }
 
@@ -585,7 +593,7 @@ class TestController extends Controller
     {
         return null;
     }
-    
+
     public function withInjectedModelFullParamName(TestPost $testPost)
     {
         return null;

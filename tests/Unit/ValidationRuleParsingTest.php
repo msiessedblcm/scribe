@@ -9,8 +9,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Knuckles\Scribe\Extracting\ParsesValidationRules;
 use Knuckles\Scribe\Tests\BaseLaravelTest;
-use Knuckles\Scribe\Tools\DocumentationConfig;
 use Knuckles\Scribe\Tests\Fixtures;
+use Knuckles\Scribe\Tools\DocumentationConfig;
 
 $invokableRulesSupported = interface_exists(\Illuminate\Contracts\Validation\InvokableRule::class);
 $laravel10Rules = version_compare(Application::VERSION, '10.0', '>=');
@@ -19,16 +19,18 @@ class ValidationRuleParsingTest extends BaseLaravelTest
 {
     private $strategy;
 
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    public function __construct(string $name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        $this->strategy = new class {
+        $this->strategy = new class
+        {
             use ParsesValidationRules;
 
             public function parse($validationRules, $customParameterData = []): array
             {
                 $this->config = new DocumentationConfig([]);
                 $bodyParametersFromValidationRules = $this->getParametersFromValidationRules($validationRules, $customParameterData);
+
                 return $this->normaliseArrayAndObjectParameters($bodyParametersFromValidationRules);
             }
         };
@@ -36,6 +38,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
 
     /**
      * @test
+     *
      * @dataProvider supportedRules
      */
     public function can_parse_supported_rules(array $ruleset, array $customInfo, array $expected)
@@ -58,7 +61,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             dump('Rules: ', $ruleset);
             dump('Generated value: ', $exampleData[$parameterName]);
             dump($e->errors());
-            $this->fail("Generated example data from validation rule failed to match actual.");
+            $this->fail('Generated example data from validation rule failed to match actual.');
         }
     }
 
@@ -66,14 +69,13 @@ class ValidationRuleParsingTest extends BaseLaravelTest
     public function can_parse_rule_objects()
     {
         $results = $this->strategy->parse([
-            'in_param' => ['numeric', Rule::in([3,5,6])]
+            'in_param' => ['numeric', Rule::in([3, 5, 6])],
         ]);
         $this->assertEquals(
             [3, 5, 6],
             $results['in_param']['enumValues']
         );
     }
-
 
     /** @test */
     public function can_transform_arrays_and_objects()
@@ -137,7 +139,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['string_param' => ['description' => $description]],
             [
                 'type' => 'string',
-                'description' => $description . ".",
+                'description' => $description . '.',
             ],
         ];
         yield 'boolean' => [
@@ -145,7 +147,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             [],
             [
                 'type' => 'boolean',
-                'description' => "",
+                'description' => '',
             ],
         ];
         yield 'integer' => [
@@ -153,7 +155,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             [],
             [
                 'type' => 'integer',
-                'description' => "",
+                'description' => '',
             ],
         ];
         yield 'numeric' => [
@@ -161,7 +163,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['numeric_param' => ['description' => $description]],
             [
                 'type' => 'number',
-                'description' => $description . ".",
+                'description' => $description . '.',
             ],
         ];
         yield 'file' => [
@@ -176,7 +178,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['image_param' => 'image|required'],
             [],
             [
-                'description' => "Must be an image.",
+                'description' => 'Must be an image.',
                 'type' => 'file',
             ],
         ];
@@ -240,23 +242,23 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['in_param' => 'in:3,5,6'],
             ['in_param' => ['description' => $description]],
             [
-                'description' => $description.".",
+                'description' => $description . '.',
                 'type' => 'string',
-                'enumValues' => [3,5,6]
+                'enumValues' => [3, 5, 6],
             ],
         ];
         yield 'not_in' => [
             ['not_param' => 'not_in:3,5,6'],
             [],
             [
-                'description' => "Must not be one of <code>3</code>, <code>5</code>, or <code>6</code>.",
+                'description' => 'Must not be one of <code>3</code>, <code>5</code>, or <code>6</code>.',
             ],
         ];
         yield 'digits' => [
             ['digits_param' => 'digits:8'],
             [],
             [
-                'description' => "Must be 8 digits.",
+                'description' => 'Must be 8 digits.',
                 'type' => 'string',
             ],
         ];
@@ -264,7 +266,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['digits_between_param' => 'digits_between:2,8'],
             [],
             [
-                'description' => "Must be between 2 and 8 digits.",
+                'description' => 'Must be between 2 and 8 digits.',
                 'type' => 'string',
             ],
         ];
@@ -272,7 +274,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['alpha_param' => 'alpha'],
             [],
             [
-                'description' => "Must contain only letters.",
+                'description' => 'Must contain only letters.',
                 'type' => 'string',
             ],
         ];
@@ -280,7 +282,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['alpha_dash_param' => 'alpha_dash'],
             [],
             [
-                'description' => "Must contain only letters, numbers, dashes and underscores.",
+                'description' => 'Must contain only letters, numbers, dashes and underscores.',
                 'type' => 'string',
             ],
         ];
@@ -288,7 +290,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['alpha_num_param' => 'alpha_num'],
             [],
             [
-                'description' => "Must contain only letters and numbers.",
+                'description' => 'Must contain only letters and numbers.',
                 'type' => 'string',
             ],
         ];
@@ -296,7 +298,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['ends_with_param' => 'ends_with:go,ha'],
             [],
             [
-                'description' => "Must end with one of <code>go</code> or <code>ha</code>.",
+                'description' => 'Must end with one of <code>go</code> or <code>ha</code>.',
                 'type' => 'string',
             ],
         ];
@@ -304,7 +306,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['starts_with_param' => 'starts_with:go,ha'],
             [],
             [
-                'description' => "Must start with one of <code>go</code> or <code>ha</code>.",
+                'description' => 'Must start with one of <code>go</code> or <code>ha</code>.',
                 'type' => 'string',
             ],
         ];
@@ -312,19 +314,19 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             ['uuid_param' => 'uuid'],
             [],
             [
-                'description' => "Must be a valid UUID.",
+                'description' => 'Must be a valid UUID.',
                 'type' => 'string',
             ],
         ];
         yield 'required_if' => [
             ['required_if_param' => 'required_if:another_field,a_value'],
             [],
-            ['description' => "This field is required when <code>another_field</code> is <code>a_value</code>."],
+            ['description' => 'This field is required when <code>another_field</code> is <code>a_value</code>.'],
         ];
         yield 'required_unless' => [
             ['required_unless_param' => 'string|required_unless:another_field,a_value'],
             [],
-            ['description' => "This field is required unless <code>another_field</code> is in <code>a_value</code>."],
+            ['description' => 'This field is required unless <code>another_field</code> is in <code>a_value</code>.'],
         ];
         yield 'required_with' => [
             ['required_with_param' => 'required_with:another_field,some_other_field'],
@@ -349,82 +351,82 @@ class ValidationRuleParsingTest extends BaseLaravelTest
         yield 'same' => [
             ['same_param' => 'same:other_field'],
             [],
-            ['description' => "The value and <code>other_field</code> must match."],
+            ['description' => 'The value and <code>other_field</code> must match.'],
         ];
         yield 'different' => [
             ['different_param' => 'string|different:other_field'],
             [],
-            ['description' => "The value and <code>other_field</code> must be different."],
+            ['description' => 'The value and <code>other_field</code> must be different.'],
         ];
         yield 'after' => [
             ['after_param' => 'after:2020-02-12'],
             [],
-            ['description' => "Must be a date after <code>2020-02-12</code>."],
+            ['description' => 'Must be a date after <code>2020-02-12</code>.'],
         ];
         yield 'before_or_equal' => [
             ['before_or_equal_param' => 'before_or_equal:2020-02-12'],
             [],
-            ['description' => "Must be a date before or equal to <code>2020-02-12</code>."],
+            ['description' => 'Must be a date before or equal to <code>2020-02-12</code>.'],
         ];
         yield 'size (number)' => [
             ['size_param' => 'numeric|size:6'],
             [],
-            ['description' => "Must be 6."],
+            ['description' => 'Must be 6.'],
         ];
         yield 'size (string)' => [
             ['size_param' => 'string|size:6'],
             [],
-            ['description' => "Must be 6 characters."],
+            ['description' => 'Must be 6 characters.'],
         ];
         yield 'size (file)' => [
             ['size_param' => 'file|size:6'],
             [],
-            ['description' => "Must be a file. Must be 6 kilobytes."],
+            ['description' => 'Must be a file. Must be 6 kilobytes.'],
         ];
         yield 'max (number)' => [
             ['max_param' => 'numeric|max:6'],
             [],
-            ['description' => "Must not be greater than 6."],
+            ['description' => 'Must not be greater than 6.'],
         ];
         yield 'max (string)' => [
             ['max_param' => 'string|max:6'],
             [],
-            ['description' => "Must not be greater than 6 characters."],
+            ['description' => 'Must not be greater than 6 characters.'],
         ];
         yield 'max (file)' => [
             ['max_param' => 'file|max:6'],
             [],
-            ['description' => "Must be a file. Must not be greater than 6 kilobytes."],
+            ['description' => 'Must be a file. Must not be greater than 6 kilobytes.'],
         ];
         yield 'min (number)' => [
             ['min_param' => 'numeric|min:6'],
             [],
-            ['description' => "Must be at least 6."],
+            ['description' => 'Must be at least 6.'],
         ];
         yield 'min (string)' => [
             ['min_param' => 'string|min:6'],
             [],
-            ['description' => "Must be at least 6 characters."],
+            ['description' => 'Must be at least 6 characters.'],
         ];
         yield 'min (file)' => [
             ['min_param' => 'file|min:6'],
             [],
-            ['description' => "Must be a file. Must be at least 6 kilobytes."],
+            ['description' => 'Must be a file. Must be at least 6 kilobytes.'],
         ];
         yield 'between (number)' => [
             ['between_param' => 'numeric|between:1,2'],
             [],
-            ['description' => "Must be between 1 and 2."],
+            ['description' => 'Must be between 1 and 2.'],
         ];
         yield 'between (string)' => [
             ['between_param' => 'string|between:1,2'],
             [],
-            ['description' => "Must be between 1 and 2 characters."],
+            ['description' => 'Must be between 1 and 2 characters.'],
         ];
         yield 'between (file)' => [
             ['between_param' => 'file|between:1,2'],
             [],
-            ['description' => "Must be a file. Must be between 1 and 2 kilobytes."],
+            ['description' => 'Must be a file. Must be between 1 and 2 kilobytes.'],
         ];
         yield 'regex' => [
             ['regex_param' => 'regex:/\d/'],
@@ -450,7 +452,7 @@ class ValidationRuleParsingTest extends BaseLaravelTest
                 [],
                 [
                     'type' => 'boolean',
-                    'description' => "Must be accepted when <code>another_field</code> is <code>a_value</code>.",
+                    'description' => 'Must be accepted when <code>another_field</code> is <code>a_value</code>.',
                 ],
             ];
         }
@@ -530,8 +532,12 @@ class ValidationRuleParsingTest extends BaseLaravelTest
         $results = $this->strategy->parse($ruleset);
         $this->assertEquals(true, $results['param1']['required']);
         $this->assertEquals('This is a dummy test rule.', $results['param1']['description']);
-        if (isset($results['param2'])) $this->assertEquals('This rule is invokable.', $results['param2']['description']);
-       if (isset($results['param3'])) $this->assertEquals('This is a custom rule.', $results['param3']['description']);
+        if (isset($results['param2'])) {
+            $this->assertEquals('This rule is invokable.', $results['param2']['description']);
+        }
+        if (isset($results['param3'])) {
+            $this->assertEquals('This is a custom rule.', $results['param3']['description']);
+        }
     }
 
     /** @test */
@@ -558,7 +564,6 @@ class ValidationRuleParsingTest extends BaseLaravelTest
             $results['enum']['example'],
             array_map(fn ($case) => $case->value, Fixtures\TestStringBackedEnum::cases())
         ));
-
 
         $results = $this->strategy->parse([
             'enum' => [
@@ -616,13 +621,13 @@ class ValidationRuleParsingTest extends BaseLaravelTest
         $this->app->extend('translator', function ($command, $app) {
             $loader = $app['translation.loader'];
             $locale = $app['config']['app.locale'];
+
             return new DummyTranslator($loader, $locale);
         });
 
         $results = $this->strategy->parse($ruleset);
 
         $this->assertEquals('successfully translated by concatenated string.', $results['nested']['description']);
-
     }
 }
 
@@ -672,7 +677,6 @@ if ($invokableRulesSupported) {
 
         public function docs()
         {
-
             return [
                 'description' => 'This rule is invokable.',
             ];
@@ -681,7 +685,7 @@ if ($invokableRulesSupported) {
 }
 
 if ($laravel10Rules) {
-// Laravel 10 deprecated the previous Rule and InvokableRule classes for a single interface
+    // Laravel 10 deprecated the previous Rule and InvokableRule classes for a single interface
     // (https://github.com/laravel/framework/pull/45954)
     class DummyL10ValidationRule implements \Illuminate\Contracts\Validation\ValidationRule
     {

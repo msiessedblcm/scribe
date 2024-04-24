@@ -15,8 +15,6 @@ abstract class Strategy
 
     /**
      * Returns an instance of the documentation config
-     *
-     * @return DocumentationConfig
      */
     public function getConfig(): DocumentationConfig
     {
@@ -24,18 +22,15 @@ abstract class Strategy
     }
 
     /**
-     * @param ExtractedEndpointData $endpointData
-     * @param array $settings Settings to be applied to this strategy while processing this route.
+     * @param  array  $settings Settings to be applied to this strategy while processing this route.
      *   In the past, this was "routeRules".
-     *
-     * @return array|null
      */
     abstract public function __invoke(ExtractedEndpointData $endpointData, array $settings = []): ?array;
 
     /**
-     * @param array $only The routes which this strategy should be applied to. Can not be specified with $except.
+     * @param  array  $only The routes which this strategy should be applied to. Can not be specified with $except.
      *   Specify route names ("users.index", "users.*"), or method and path ("GET *", "POST /safe/*").
-     * @param array $except The routes which this strategy should be applied to. Can not be specified with $only.
+     * @param  array  $except The routes which this strategy should be applied to. Can not be specified with $only.
      *   Specify route names ("users.index", "users.*"), or method and path ("GET *", "POST /safe/*").
      * @return array{string,array} Tuple of strategy class FQN and specified settings.
      */
@@ -43,11 +38,10 @@ abstract class Strategy
         array $only = ['*'],
         array $except = [],
         ...$otherSettings
-    ): array
-    {
-        if (!empty($only) && !empty($except)) {
+    ): array {
+        if (! empty($only) && ! empty($except)) {
             throw new \InvalidArgumentException(
-                "You can not specify both \$only and \$except together in your ".static::class." settings"
+                'You can not specify both $only and $except together in your ' . static::class . ' settings'
             );
         }
 

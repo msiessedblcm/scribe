@@ -30,9 +30,10 @@ class GetFromDocBlocks extends Strategy
             'title' => $title ?: $methodDocBlock->getShortDescription(),
             'description' => $methodDocBlock->getLongDescription()->getContents(),
         ];
-        if (!is_null($authStatus = $this->getAuthStatusFromDocBlock($methodDocBlock, $classDocBlock))) {
+        if (! is_null($authStatus = $this->getAuthStatusFromDocBlock($methodDocBlock, $classDocBlock))) {
             $metadata['authenticated'] = $authStatus;
         }
+
         return $metadata;
     }
 

@@ -12,52 +12,68 @@ use Symfony\Component\VarExporter\VarExporter;
 
 class Upgrade extends Command
 {
-    protected $signature = "scribe:upgrade {--dry-run : Print the changes that will be made, without actually making them}
+    protected $signature = 'scribe:upgrade {--dry-run : Print the changes that will be made, without actually making them}
                             {--config=scribe : choose which config file to use}
-                            ";
+                            ';
 
     protected $description = '';
+
     protected bool $applyChanges;
+
     protected string $configName;
 
     public function handle(): void
     {
-        $this->applyChanges = !$this->option('dry-run');
+        $this->applyChanges = ! $this->option('dry-run');
 
         $this->configName = $this->option('config');
-        if (!($oldConfig = config($this->configName))) {
+        if (! ($oldConfig = config($this->configName))) {
             $this->error("The specified config (config/{$this->configName}.php) doesn't exist.");
+
             return;
         }
 
-        if (array_key_exists("interactive", $oldConfig)) {
+        if (array_key_exists('interactive', $oldConfig)) {
             $this->error("This upgrade tool is for upgrading from Scribe v3 to v4, but it looks like you're coming from v2.");
-            $this->error("Please install v3 and follow its upgrade guide first.");
+            $this->error('Please install v3 and follow its upgrade guide first.');
+
             return;
         }
 
-        $isMajorUpgrade = array_key_exists("default_group", $oldConfig) || array_key_exists("faker_seed", $oldConfig);
+        $isMajorUpgrade = array_key_exists('default_group', $oldConfig) || array_key_exists('faker_seed', $oldConfig);
 
-        if ($isMajorUpgrade) $this->info("Welcome to the Scribe v3 to v4 upgrader.");
-        $this->line("Checking for config file changes...");
+        if ($isMajorUpgrade) {
+            $this->info('Welcome to the Scribe v3 to v4 upgrader.');
+        }
+        $this->line('Checking for config file changes...');
 
         $upgrader = Upgrader::ofConfigFile("config/$this->configName.php", __DIR__ . '/../../config/scribe.php')
-            ->dontTouch('routes', 'laravel.middleware', 'postman.overrides', 'openapi.overrides',
-                'example_languages', 'database_connections_to_transact', 'strategies', 'examples.models_source')
+            ->dontTouch(
+                'routes',
+                'laravel.middleware',
+                'postman.overrides',
+                'openapi.overrides',
+                'example_languages',
+                'database_connections_to_transact',
+                'strategies',
+                'examples.models_source'
+            )
             ->move('default_group', 'groups.default')
-            ->move('faker_seed', 'examples.faker_seed');
+            ->move('faker_seed', 'examples.faker_seed')
+        ;
 
-        if (!$isMajorUpgrade)
+        if (! $isMajorUpgrade) {
             $upgrader->dontTouch('groups');
+        }
 
         $changes = $upgrader->dryRun();
         if (empty($changes)) {
-            $this->info("✔ No config file changes needed.");
+            $this->info('✔ No config file changes needed.');
         } else {
             $this->info('The following changes will be made to your config file:');
             $this->newLine();
             foreach ($changes as $change) {
-                $this->line($change["description"]);
+                $this->line($change['description']);
             }
 
             if ($this->applyChanges) {
@@ -67,9 +83,10 @@ class Upgrade extends Command
         }
         $this->newLine();
 
-        if (!$isMajorUpgrade) {
-            $this->info("✔ Done.");
-            $this->info(sprintf("See the full changelog at https://github.com/knuckleswtf/scribe/blob/%s/CHANGELOG.md", Scribe::VERSION));
+        if (! $isMajorUpgrade) {
+            $this->info('✔ Done.');
+            $this->info(sprintf('See the full changelog at https://github.com/knuckleswtf/scribe/blob/%s/CHANGELOG.md', Scribe::VERSION));
+
             return;
         }
 
@@ -81,15 +98,15 @@ class Upgrade extends Command
         $this->migrateToConfigFileSort();
 
         if ($this->applyChanges) {
-            if ($this->confirm("Do you have any custom strategies?")) {
+            if ($this->confirm('Do you have any custom strategies?')) {
                 $this->line('1. Add a new property <info>public ?ExtractedEndpointData $endpointData;</info>.');
                 $this->line('2. Replace the <info>array $routeRules</info> parameter in __invoke() with <info>array $routeRules = []</info> .');
             }
             $this->newLine();
-            $this->info("✔ Done.");
+            $this->info('✔ Done.');
         }
 
-        $this->line("See the release announcement at <href=https://scribe.knuckles.wtf/blog/laravel-v4>http://scribe.knuckles.wtf/blog/laravel-v4</> for the full upgrade guide!");
+        $this->line('See the release announcement at <href=https://scribe.knuckles.wtf/blog/laravel-v4>http://scribe.knuckles.wtf/blog/laravel-v4</> for the full upgrade guide!');
     }
 
     /**
@@ -99,16 +116,16 @@ class Upgrade extends Command
      */
     protected function migrateToConfigFileSort()
     {
-        $this->info("In v3, you sorted endpoints/groups by editing/renaming the generated YAML files (or `beforeGroup`/`afterGroup` for custom endpoints).");
+        $this->info('In v3, you sorted endpoints/groups by editing/renaming the generated YAML files (or `beforeGroup`/`afterGroup` for custom endpoints).');
         $this->info("We'll automatically import your current sorting into the config item `groups.order`.");
 
-        $defaultGroup = config($this->configName.".default_group");
+        $defaultGroup = config($this->configName . '.default_group');
         $pathConfig = new PathConfig($this->configName);
         $extractedEndpoints = GroupedEndpointsFactory::fromCamelDir($pathConfig)->get();
 
         $order = array_map(function (array $group) {
             return array_map(function (array $endpoint) {
-                return $endpoint['metadata']['title'] ?: ($endpoint['httpMethods'][0] . ' /'. $endpoint['uri']);
+                return $endpoint['metadata']['title'] ?: ($endpoint['httpMethods'][0] . ' /' . $endpoint['uri']);
             }, $group['endpoints']);
         }, $extractedEndpoints);
         $groupsOrder = array_keys($order);
@@ -121,12 +138,12 @@ class Upgrade extends Command
                 $groupName = $endpoint['metadata']['groupName'] ?? $defaultGroup;
                 $endpointTitle = $endpoint['metadata']['title'] ?? ($endpoint['httpMethods'][0] . ' /' . $endpoint['uri']);
 
-                if (!isset($order[$groupName])) {
+                if (! isset($order[$groupName])) {
                     // This is a new group; place it at the right spot.
                     if (($nextGroup = $endpoint['metadata']['beforeGroup'] ?? null)) {
                         $index = $keyIndices[$nextGroup];
                         array_splice($groupsOrder, $index, 0, [$groupName]);
-                    } else if (($previousGroup = $endpoint['metadata']['afterGroup'] ?? null)) {
+                    } elseif (($previousGroup = $endpoint['metadata']['afterGroup'] ?? null)) {
                         $index = $keyIndices[$previousGroup];
                         array_splice($groupsOrder, $index + 1, 0, [$groupName]);
                     } else {
@@ -156,11 +173,10 @@ class Upgrade extends Command
                 file_get_contents($configFile)
             );
             file_put_contents($configFile, $newContents);
-            $this->info("✔ Updated `groups.order`.");
+            $this->info('✔ Updated `groups.order`.');
         } else {
-            $this->line("- `groups.order` will be set to:");
+            $this->line('- `groups.order` will be set to:');
             $this->info($output);
         }
     }
-
 }

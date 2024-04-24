@@ -1,7 +1,7 @@
 <?php
 
-use Knuckles\Scribe\Extracting\Strategies;
 use Knuckles\Scribe;
+use Knuckles\Scribe\Extracting\Strategies;
 
 /**
  * For documentation, use your IDE's features, or see https://scribe.knuckles.wtf/laravel/reference/config
@@ -25,7 +25,7 @@ return Scribe\Config\Factory::make(
             in: 'bearer',
             useValue: env('SCRIBE_AUTH_KEY'),
             placeholder: '{YOUR_AUTH_KEY}',
-            extraInfo: <<<AUTH
+            extraInfo: <<<'AUTH'
         You can retrieve your token by visiting your dashboard and clicking <b>Generate API token</b>.
         AUTH
         ),
@@ -59,12 +59,12 @@ return Scribe\Config\Factory::make(
         title: null,
         description: '',
         baseUrls: [
-            "production" => config("app.base_url"),
+            'production' => config('app.base_url'),
         ],
         exampleLanguages: ['bash', 'javascript'],
         logo: false,
         lastUpdated: 'Last updated: {date:F j, Y}',
-        introText: <<<INTRO
+        introText: <<<'INTRO'
     This documentation aims to provide all the information you need to work with our API.
 
     <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).

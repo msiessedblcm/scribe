@@ -2,7 +2,6 @@
 
 namespace Knuckles\Scribe\Tools;
 
-
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\CompilerInterface;
 use Illuminate\View\Engines\CompilerEngine;
@@ -20,7 +19,6 @@ class BladeMarkdownEngine extends CompilerEngine
 
     /**
      * Get the evaluated contents of the view.
-     *
      */
     public function get($path, array $data = [])
     {

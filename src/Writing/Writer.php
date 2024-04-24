@@ -13,11 +13,13 @@ use Symfony\Component\Yaml\Yaml;
 class Writer
 {
     protected bool $isStatic;
+
     protected bool $isExternal;
 
     protected ?string $staticTypeOutputPath;
 
     protected ?string $laravelTypeOutputPath;
+
     protected array $generatedFiles = [
         'postman' => null,
         'openapi' => null,
@@ -42,11 +44,11 @@ class Writer
 
         $this->laravelAssetsPath = $this->config->get('laravel.assets_directory')
             ? '/' . $this->config->get('laravel.assets_directory')
-            : "/vendor/" . $this->paths->outputPath();
+            : '/vendor/' . $this->paths->outputPath();
     }
 
     /**
-     * @param array[] $groupedEndpoints
+     * @param  array[]  $groupedEndpoints
      */
     public function writeDocs(array $groupedEndpoints)
     {
@@ -112,9 +114,7 @@ class Writer
     /**
      * Generate Postman collection JSON file.
      *
-     * @param array[] $groupedEndpoints
-     *
-     * @return string
+     * @param  array[]  $groupedEndpoints
      */
     public function generatePostmanCollection(array $groupedEndpoints): string
     {
@@ -128,13 +128,12 @@ class Writer
                 data_set($collection, $key, $value);
             }
         }
+
         return json_encode($collection, JSON_PRETTY_PRINT);
     }
 
     /**
-     * @param array[] $groupedEndpoints
-     *
-     * @return string
+     * @param  array[]  $groupedEndpoints
      */
     public function generateOpenAPISpec(array $groupedEndpoints): string
     {
@@ -148,19 +147,19 @@ class Writer
                 data_set($spec, $key, $value);
             }
         }
+
         return Yaml::dump($spec, 20, 2, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE | Yaml::DUMP_OBJECT_AS_MAP);
     }
 
     protected function performFinalTasksForLaravelType(): void
     {
-        if (!is_dir($this->laravelTypeOutputPath)) {
+        if (! is_dir($this->laravelTypeOutputPath)) {
             mkdir($this->laravelTypeOutputPath, 0777, true);
         }
         $publicDirectory = public_path();
-        if (!is_dir($publicDirectory . $this->laravelAssetsPath)) {
+        if (! is_dir($publicDirectory . $this->laravelAssetsPath)) {
             mkdir($publicDirectory . $this->laravelAssetsPath, 0777, true);
         }
-
 
         // Transform output HTML to a Blade view
         rename("{$this->staticTypeOutputPath}/index.html", "$this->laravelTypeOutputPath/index.blade.php");
@@ -191,7 +190,7 @@ class Writer
         $writer = app()->makeWith(HtmlWriter::class, ['config' => $this->config]);
         $writer->generate($groupedEndpoints, $this->paths->intermediateOutputPath(), $this->staticTypeOutputPath);
 
-        if (!$this->isStatic) {
+        if (! $this->isStatic) {
             $this->performFinalTasksForLaravelType();
         }
 
@@ -202,10 +201,10 @@ class Writer
             $assetsOutputPath = $outputPath;
         } else {
             $outputPath = rtrim($this->laravelTypeOutputPath, '/') . '/';
-            c::success("Wrote Blade docs to: " . $this->makePathFriendly($outputPath));
+            c::success('Wrote Blade docs to: ' . $this->makePathFriendly($outputPath));
             $this->generatedFiles['blade'] = realpath("{$outputPath}index.blade.php");
             $assetsOutputPath = public_path() . $this->laravelAssetsPath . '/';
-            c::success("Wrote Laravel assets to: " . $this->makePathFriendly($assetsOutputPath));
+            c::success('Wrote Laravel assets to: ' . $this->makePathFriendly($assetsOutputPath));
         }
         $this->generatedFiles['assets']['js'] = realpath("{$assetsOutputPath}js");
         $this->generatedFiles['assets']['css'] = realpath("{$assetsOutputPath}css");
@@ -220,9 +219,9 @@ class Writer
         $writer = app()->makeWith(ExternalHtmlWriter::class, ['config' => $this->config]);
         $writer->generate([], $this->paths->intermediateOutputPath(), $this->staticTypeOutputPath);
 
-       if (!$this->isStatic) {
-           $this->performFinalTasksForLaravelType();
-       }
+        if (! $this->isStatic) {
+            $this->performFinalTasksForLaravelType();
+        }
 
         if ($this->isStatic) {
             $outputPath = rtrim($this->staticTypeOutputPath, '/') . '/';
@@ -230,29 +229,31 @@ class Writer
             $this->generatedFiles['html'] = realpath("{$outputPath}index.html");
         } else {
             $outputPath = rtrim($this->laravelTypeOutputPath, '/') . '/';
-            c::success("Wrote Blade docs to: " . $this->makePathFriendly($outputPath));
+            c::success('Wrote Blade docs to: ' . $this->makePathFriendly($outputPath));
             $this->generatedFiles['blade'] = realpath("{$outputPath}index.blade.php");
             $assetsOutputPath = public_path() . $this->laravelAssetsPath . '/';
-            c::success("Wrote Laravel assets to: " . $this->makePathFriendly($assetsOutputPath));
+            c::success('Wrote Laravel assets to: ' . $this->makePathFriendly($assetsOutputPath));
         }
     }
 
     protected function runAfterGeneratingHook()
     {
         if (is_callable(Globals::$__afterGenerating)) {
-            c::info("Running `afterGenerating()` hook...");
+            c::info('Running `afterGenerating()` hook...');
             call_user_func_array(Globals::$__afterGenerating, [$this->generatedFiles]);
         }
     }
 
     protected function getLaravelTypeOutputPath(): ?string
     {
-        if ($this->isStatic) return null;
+        if ($this->isStatic) {
+            return null;
+        }
 
         return config(
             'view.paths.0',
-            function_exists('base_path') ? base_path("resources/views") : "resources/views"
-        ). "/" . $this->paths->outputPath();
+            function_exists('base_path') ? base_path('resources/views') : 'resources/views'
+        ) . '/' . $this->paths->outputPath();
     }
 
     /**
@@ -263,6 +264,6 @@ class Writer
      */
     protected function makePathFriendly(string $path): string
     {
-        return str_replace("\\", "/", str_replace(getcwd() . DIRECTORY_SEPARATOR, "", $path));
+        return str_replace('\\', '/', str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $path));
     }
 }

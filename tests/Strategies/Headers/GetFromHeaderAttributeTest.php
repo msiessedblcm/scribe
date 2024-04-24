@@ -3,12 +3,12 @@
 namespace Knuckles\Scribe\Tests\Strategies\Headers;
 
 use Attribute;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Attributes\Header;
 use Knuckles\Scribe\Extracting\Strategies\Headers\GetFromHeaderAttribute;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use PHPUnit\Framework\TestCase;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use ReflectionClass;
 
 class GetFromHeaderAttributeTest extends TestCase
@@ -41,8 +41,11 @@ class GetFromHeaderAttributeTest extends TestCase
 
     private function getHeaderFromAttribute(string $methodName): array
     {
-        $endpoint = new class extends ExtractedEndpointData {
-            public function __construct(array $parameters = []) {}
+        $endpoint = new class extends ExtractedEndpointData
+        {
+            public function __construct(array $parameters = [])
+            {
+            }
         };
         $endpoint->controller = new ReflectionClass(\Knuckles\Scribe\Tests\Strategies\Headers\HeaderAttributeTestController::class);
         $endpoint->method = $endpoint->controller->getMethod($methodName);
@@ -51,22 +54,19 @@ class GetFromHeaderAttributeTest extends TestCase
 
         return $strategy($endpoint);
     }
-
 }
 
-#[Header("Api-Version", "v1")]
+#[Header('Api-Version', 'v1')]
 class HeaderAttributeTestController
 {
-    #[Header("Some-Custom")]
+    #[Header('Some-Custom')]
     public function methodWithAttributes()
     {
-
     }
 
     #[CustomHeaderClass()]
     public function methodWithCustomHeaderAttribute()
     {
-
     }
 }
 

@@ -16,6 +16,7 @@ use Throwable;
 class MethodAstParser
 {
     protected static array $methodAsts = [];
+
     protected static array $classAsts = [];
 
     public static function getMethodAst(ReflectionFunctionAbstract $method)
@@ -37,8 +38,6 @@ class MethodAstParser
     }
 
     /**
-     * @param string $sourceCode
-     *
      * @return \PhpParser\Node\Stmt[]|null
      */
     protected static function parseClassSourceCode(string $sourceCode): ?array
@@ -54,16 +53,14 @@ class MethodAstParser
     }
 
     /**
-     * @param \PhpParser\Node\Stmt[] $ast
-     * @param string $methodName
-     *
+     * @param  \PhpParser\Node\Stmt[]  $ast
      * @return Node|null
      */
     protected static function findMethodInClassAst(array $ast, string $methodName)
     {
         $nodeFinder = new NodeFinder;
 
-        return $nodeFinder->findFirst($ast, function(Node $node) use ($methodName) {
+        return $nodeFinder->findFirst($ast, function (Node $node) use ($methodName) {
             // Todo handle closures
             return $node instanceof Node\Stmt\ClassMethod
                 && $node->name->toString() === $methodName;
@@ -73,6 +70,7 @@ class MethodAstParser
     protected static function getCachedMethodAst(string $fileName, string $methodName)
     {
         $key = self::getAstCacheId($fileName, $methodName);
+
         return self::$methodAsts[$key] ?? null;
     }
 
@@ -84,13 +82,14 @@ class MethodAstParser
 
     private static function getAstCacheId(string $fileName, string $methodName): string
     {
-        return $fileName . "///". $methodName;
+        return $fileName . '///' . $methodName;
     }
 
     private static function getClassAst(string $fileName)
     {
         $classAst = self::$classAsts[$fileName]
             ?? self::parseClassSourceCode(file_get_contents($fileName));
+
         return self::$classAsts[$fileName] = $classAst;
     }
 }

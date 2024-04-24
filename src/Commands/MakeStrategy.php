@@ -22,7 +22,7 @@ class MakeStrategy extends GeneratorCommand
 
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\Docs\Strategies';
+        return $rootNamespace . '\Docs\Strategies';
     }
 
     protected function replaceClass($stub, $name)
@@ -31,5 +31,4 @@ class MakeStrategy extends GeneratorCommand
 
         return $stub;
     }
-
 }

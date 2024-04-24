@@ -3,6 +3,7 @@
 namespace Knuckles\Scribe\Tests\Strategies\ResponseFields;
 
 use Closure;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Camel\Extraction\ResponseCollection;
 use Knuckles\Scribe\Attributes\ResponseField;
@@ -12,7 +13,6 @@ use Knuckles\Scribe\Tests\Fixtures\TestPet;
 use Knuckles\Scribe\Tests\Fixtures\TestPetApiResource;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use PHPUnit\Framework\TestCase;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use ReflectionClass;
 
 class GetFromResponseFieldAttributesTest extends TestCase
@@ -79,17 +79,20 @@ class GetFromResponseFieldAttributesTest extends TestCase
     protected function fetch($endpoint): array
     {
         $strategy = new GetFromResponseFieldAttribute(new DocumentationConfig([]));
+
         return $strategy($endpoint);
     }
 
     protected function endpoint(Closure $configure): ExtractedEndpointData
     {
-        $endpoint = new class extends ExtractedEndpointData {
+        $endpoint = new class extends ExtractedEndpointData
+        {
             public function __construct(array $parameters = [])
             {
             }
         };
         $configure($endpoint);
+
         return $endpoint;
     }
 }

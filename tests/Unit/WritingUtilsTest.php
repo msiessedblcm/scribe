@@ -11,7 +11,7 @@ class WritingUtilsTest extends BaseLaravelTest
     public function print_query_params_as_key_value_js()
     {
         $queryParams = WritingUtils::printQueryParamsAsKeyValue($this->queryParams());
-        $this->assertStringsEqualNormalizingNewlines(<<<EOL
+        $this->assertStringsEqualNormalizingNewlines(<<<'EOL'
                             {
                                 "name query": "name value",
                                 "list query[0]": "list element 1",
@@ -22,14 +22,13 @@ class WritingUtilsTest extends BaseLaravelTest
                                 "nested query[nested query level 1 query]": "name nested 1",
                             }
                             EOL, $queryParams);
-
     }
 
     /** @test */
     public function print_query_params_as_key_value_php()
     {
-        $queryParams = WritingUtils::printQueryParamsAsKeyValue($this->queryParams(), "'", " =>", 4, "[]");
-        $this->assertStringsEqualNormalizingNewlines(<<<EOL
+        $queryParams = WritingUtils::printQueryParamsAsKeyValue($this->queryParams(), "'", ' =>', 4, '[]');
+        $this->assertStringsEqualNormalizingNewlines(<<<'EOL'
                             [
                                 'name query' => 'name value',
                                 'list query[0]' => 'list element 1',
@@ -40,14 +39,13 @@ class WritingUtilsTest extends BaseLaravelTest
                                 'nested query[nested query level 1 query]' => 'name nested 1',
                             ]
                             EOL, $queryParams);
-
     }
 
     /** @test */
     public function print_query_params_as_key_value_python()
     {
-        $queryParams = WritingUtils::printQueryParamsAsKeyValue($this->queryParams(), "'", ":", 2, "{}");
-        $this->assertStringsEqualNormalizingNewlines(<<<EOL
+        $queryParams = WritingUtils::printQueryParamsAsKeyValue($this->queryParams(), "'", ':', 2, '{}');
+        $this->assertStringsEqualNormalizingNewlines(<<<'EOL'
                             {
                               'name query': 'name value',
                               'list query[0]': 'list element 1',
@@ -58,7 +56,6 @@ class WritingUtilsTest extends BaseLaravelTest
                               'nested query[nested query level 1 query]': 'name nested 1',
                             }
                             EOL, $queryParams);
-
     }
 
     /** @test */
@@ -113,7 +110,7 @@ class WritingUtilsTest extends BaseLaravelTest
                     ],
                     'nested query level 2 query' => 'name nested 2',
                 ],
-                'nested query level 1 query' => 'name nested 1'
+                'nested query level 1 query' => 'name nested 1',
             ],
         ];
     }
@@ -177,6 +174,6 @@ class WritingUtilsTest extends BaseLaravelTest
 
     protected function assertStringsEqualNormalizingNewlines(string $expected, string $actual)
     {
-        $this->assertEquals(str_replace("\r", "", $expected), str_replace("\r", "", $actual));
+        $this->assertEquals(str_replace("\r", '', $expected), str_replace("\r", '', $actual));
     }
 }

@@ -57,7 +57,8 @@ class RouteMatcher implements RouteMatcherInterface
         return collect($allRouteCollections)
             ->flatMap(function (RouteCollection $collection) {
                 return $collection->getRoutes();
-            })->toArray();
+            })->toArray()
+        ;
     }
 
     private function shouldIncludeRoute(Route $route, array $routeRule, array $mustIncludes, bool $usingDingoRouter): bool
@@ -68,7 +69,7 @@ class RouteMatcher implements RouteMatcherInterface
 
         $matchesVersion = true;
         if ($usingDingoRouter) {
-            $matchesVersion = !empty(array_intersect($route->versions(), $routeRule['match']['versions'] ?? []));
+            $matchesVersion = ! empty(array_intersect($route->versions(), $routeRule['match']['versions'] ?? []));
         }
 
         $domainsToMatch = $routeRule['match']['domains'] ?? [];

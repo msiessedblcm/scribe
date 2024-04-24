@@ -6,7 +6,7 @@ use Knuckles\Scribe\Extracting\Strategies\GetFieldsFromTagStrategy;
 
 class GetFromBodyParamTag extends GetFieldsFromTagStrategy
 {
-    protected string $tagName = "bodyParam";
+    protected string $tagName = 'bodyParam';
 
     public function parseTag(string $tagContent): array
     {

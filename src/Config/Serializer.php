@@ -55,7 +55,7 @@ class Serializer
                 ],
                 'include' => $routesConfig->alwaysInclude,
                 'exclude' => $routesConfig->alwaysExclude,
-            ]
+            ],
         ];
     }
 

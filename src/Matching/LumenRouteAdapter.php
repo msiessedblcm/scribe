@@ -13,8 +13,6 @@ class LumenRouteAdapter extends Route
 {
     /**
      * LumenRouteAdapter constructor.
-     *
-     * @param array $lumenRoute
      */
     public function __construct(array $lumenRoute)
     {

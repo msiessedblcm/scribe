@@ -11,7 +11,6 @@ class TestPetApiResource extends JsonResource
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
-     *
      * @return array
      */
     #[ResponseField('id', description: 'The id of the pet.')]
@@ -27,7 +26,7 @@ class TestPetApiResource extends JsonResource
             }),
             'ownership' => $this->whenPivotLoaded('pet_user', function () {
                 return $this->pivot;
-            })
+            }),
         ];
 
         return $result;

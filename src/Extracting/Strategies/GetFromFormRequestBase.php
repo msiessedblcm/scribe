@@ -2,10 +2,11 @@
 
 namespace Knuckles\Scribe\Extracting\Strategies;
 
+use Dingo\Api\Http\FormRequest as DingoFormRequest;
+use Illuminate\Contracts\Validation\Factory as ValidationFactory;
+use Illuminate\Foundation\Http\FormRequest as LaravelFormRequest;
 use Illuminate\Routing\Route;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
-use Dingo\Api\Http\FormRequest as DingoFormRequest;
-use Illuminate\Foundation\Http\FormRequest as LaravelFormRequest;
 use Knuckles\Scribe\Extracting\FindsFormRequestForMethod;
 use Knuckles\Scribe\Extracting\ParsesValidationRules;
 use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
@@ -13,7 +14,6 @@ use Knuckles\Scribe\Tools\Globals;
 use Knuckles\Scribe\Tools\RouteDecorator;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
-use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 
 class GetFromFormRequestBase extends Strategy
 {
@@ -28,11 +28,11 @@ class GetFromFormRequestBase extends Strategy
 
     public function getParametersFromFormRequest(ReflectionFunctionAbstract $method, Route $route): array
     {
-        if (!$formRequestReflectionClass = $this->getFormRequestReflectionClass($method)) {
+        if (! $formRequestReflectionClass = $this->getFormRequestReflectionClass($method)) {
             return [];
         }
 
-        if (!$this->isFormRequestMeantForThisStrategy($formRequestReflectionClass)) {
+        if (! $this->isFormRequestMeantForThisStrategy($formRequestReflectionClass)) {
             return [];
         }
 
@@ -43,7 +43,7 @@ class GetFromFormRequestBase extends Strategy
         } elseif ($className == "Lorisleiva\Actions\ActionRequest") {
             $formRequest = new $className;
             $decoratedRoute = new RouteDecorator($route);
-            $formRequest->setAction($decoratedRoute->getContainer()->make($route->action["controller"]));
+            $formRequest->setAction($decoratedRoute->getContainer()->make($route->action['controller']));
         } else {
             $formRequest = new $className;
         }
@@ -64,8 +64,7 @@ class GetFromFormRequestBase extends Strategy
     }
 
     /**
-     * @param LaravelFormRequest|DingoFormRequest $formRequest
-     *
+     * @param  LaravelFormRequest|DingoFormRequest  $formRequest
      * @return mixed
      */
     protected function getRouteValidationRules($formRequest)
@@ -74,7 +73,8 @@ class GetFromFormRequestBase extends Strategy
             $validationFactory = app(ValidationFactory::class);
 
             return app()->call([$formRequest, 'validator'], [$validationFactory])
-                ->getRules();
+                ->getRules()
+            ;
         } elseif (method_exists($formRequest, 'rules')) {
             return app()->call([$formRequest, 'rules']);
         }
@@ -83,7 +83,7 @@ class GetFromFormRequestBase extends Strategy
     }
 
     /**
-     * @param LaravelFormRequest|DingoFormRequest $formRequest
+     * @param  LaravelFormRequest|DingoFormRequest  $formRequest
      */
     protected function getCustomParameterData($formRequest)
     {
@@ -91,7 +91,7 @@ class GetFromFormRequestBase extends Strategy
             return call_user_func_array([$formRequest, $this->customParameterDataMethodName], []);
         }
 
-        c::warn("No {$this->customParameterDataMethodName}() method found in " . get_class($formRequest) . ". Scribe will only be able to extract basic information from the rules() method.");
+        c::warn("No {$this->customParameterDataMethodName}() method found in " . get_class($formRequest) . '. Scribe will only be able to extract basic information from the rules() method.');
 
         return [];
     }
@@ -105,6 +105,4 @@ class GetFromFormRequestBase extends Strategy
     {
         return $formRequestReflectionClass->hasMethod($this->customParameterDataMethodName);
     }
-
 }
-

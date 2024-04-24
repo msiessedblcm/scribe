@@ -33,7 +33,7 @@ class ScribeServiceProvider extends ServiceProvider
         // Bind the route matcher implementation
         $this->app->bind(RouteMatcherInterface::class, config('scribe.routeMatcher', RouteMatcher::class));
 
-        if (!class_exists('Str')) {
+        if (! class_exists('Str')) {
             // Lumen may not have the aliases set up, and we don't want to have to use the FQN in our blade files.
             class_alias(\Illuminate\Support\Str::class, 'Str');
         }
@@ -67,7 +67,8 @@ class ScribeServiceProvider extends ServiceProvider
     {
         // Register custom Markdown Blade compiler so we can automatically have MD views converted to HTML
         $this->app->view->getEngineResolver()
-            ->register('blademd', fn() => new BladeMarkdownEngine($this->app['blade.compiler']));
+            ->register('blademd', fn () => new BladeMarkdownEngine($this->app['blade.compiler']))
+        ;
         $this->app->view->addExtension('md.blade.php', 'blademd');
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views/', 'scribe');

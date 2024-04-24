@@ -19,7 +19,7 @@ class ExternalHtmlWriter extends HtmlWriter
             'htmlAttributes' => $this->config->get('external.html_attributes', []),
         ])->render();
 
-        if (!is_dir($destinationFolder)) {
+        if (! is_dir($destinationFolder)) {
             mkdir($destinationFolder, 0777, true);
         }
 
@@ -35,15 +35,15 @@ class ExternalHtmlWriter extends HtmlWriter
         if ($this->config->get('openapi.enabled', false)) {
             $openApiSpecUrl = "{$this->assetPathPrefix}openapi.yaml";
         }
+
         return [
             'title' => $this->config->get('title') ?: config('app.name', '') . ' Documentation',
             'example_languages' => $this->config->get('example_languages'), // may be useful
             'logo' => $this->config->get('logo') ?? false,
             'last_updated' => $this->getLastUpdated(), // may be useful
             'try_it_out' => $this->config->get('try_it_out'), // may be useful
-            "postman_collection_url" => $postmanCollectionUrl ?? null,
-            "openapi_spec_url" => $openApiSpecUrl ?? null,
+            'postman_collection_url' => $postmanCollectionUrl ?? null,
+            'openapi_spec_url' => $openApiSpecUrl ?? null,
         ];
     }
-
 }

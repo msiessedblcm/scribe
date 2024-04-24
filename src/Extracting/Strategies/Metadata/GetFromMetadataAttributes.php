@@ -31,15 +31,14 @@ class GetFromMetadataAttributes extends PhpAttributeStrategy
         array $attributesOnMethod,
         array $attributesOnFormRequest = [],
         array $attributesOnController = []
-    ): ?array
-    {
+    ): ?array {
         $metadata = [
-            "groupName" => "",
-            "groupDescription" => "",
-            "subgroup" => "",
-            "subgroupDescription" => "",
-            "title" => "",
-            "description" => "",
+            'groupName' => '',
+            'groupDescription' => '',
+            'subgroup' => '',
+            'subgroupDescription' => '',
+            'title' => '',
+            'description' => '',
         ];
         foreach ([...$attributesOnController, ...$attributesOnFormRequest, ...$attributesOnMethod] as $attributeInstance) {
             $metadata = array_merge($metadata, $attributeInstance->toArray());
@@ -47,5 +46,4 @@ class GetFromMetadataAttributes extends PhpAttributeStrategy
 
         return $metadata;
     }
-
 }

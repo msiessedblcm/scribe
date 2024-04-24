@@ -7,7 +7,7 @@ use Knuckles\Scribe\Extracting\Strategies\GetFieldsFromTagStrategy;
 
 class GetFromUrlParamTag extends GetFieldsFromTagStrategy
 {
-    protected string $tagName = "urlParam";
+    protected string $tagName = 'urlParam';
 
     protected function parseTag(string $tagContent): array
     {

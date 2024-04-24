@@ -9,7 +9,6 @@ use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 use Knuckles\Scribe\Attributes\ResponseFromFile;
 use Knuckles\Scribe\Attributes\ResponseFromTransformer;
 use Knuckles\Scribe\Extracting\Strategies\Responses\UseResponseAttributes;
-use Knuckles\Scribe\ScribeServiceProvider;
 use Knuckles\Scribe\Tests\BaseLaravelTest;
 use Knuckles\Scribe\Tests\Fixtures\TestModel;
 use Knuckles\Scribe\Tests\Fixtures\TestPet;
@@ -27,8 +26,9 @@ class UseResponseAttributesTest extends BaseLaravelTest
     {
         $providers = parent::getPackageProviders($app);
         if (class_exists(\Illuminate\Database\Eloquent\LegacyFactoryServiceProvider::class)) {
-            $providers[] = \Illuminate\Database\Eloquent\LegacyFactoryServiceProvider ::class;
+            $providers[] = \Illuminate\Database\Eloquent\LegacyFactoryServiceProvider::class;
         }
+
         return $providers;
     }
 
@@ -47,8 +47,8 @@ class UseResponseAttributesTest extends BaseLaravelTest
                 'email' => 'a@b.com',
             ];
         });
-        $factory->state(TestUser::class, 'state1', ["state1" => true]);
-        $factory->state(TestUser::class, 'random-state', ["random-state" => true]);
+        $factory->state(TestUser::class, 'state1', ['state1' => true]);
+        $factory->state(TestUser::class, 'random-state', ['random-state' => true]);
         $factory->define(TestPet::class, function () {
             return [
                 'id' => 1,
@@ -61,17 +61,17 @@ class UseResponseAttributesTest extends BaseLaravelTest
     /** @test */
     public function can_parse_plain_response_attributes()
     {
-        $results = $this->fetch($this->endpoint("plainResponseAttributes"));
+        $results = $this->fetch($this->endpoint('plainResponseAttributes'));
 
         $this->assertArraySubset([
             [
                 'status' => 200,
-                'content' => json_encode(["all" => "good"]),
-                "description" => "Success"
+                'content' => json_encode(['all' => 'good']),
+                'description' => 'Success',
             ],
             [
                 'status' => 201,
-                'content' => json_encode(["all" => "good"]),
+                'content' => json_encode(['all' => 'good']),
             ],
         ], $results);
     }
@@ -79,12 +79,12 @@ class UseResponseAttributesTest extends BaseLaravelTest
     /** @test */
     public function can_parse_responsefile_attributes()
     {
-        $results = $this->fetch($this->endpoint("responseFileAttributes"));
+        $results = $this->fetch($this->endpoint('responseFileAttributes'));
 
         $this->assertArraySubset([
             [
                 'status' => 401,
-                'content' => json_encode(["message" => "Unauthorized", "merge" => "this"]),
+                'content' => json_encode(['message' => 'Unauthorized', 'merge' => 'this']),
             ],
         ], $results);
     }
@@ -100,7 +100,7 @@ class UseResponseAttributesTest extends BaseLaravelTest
             }
         });
 
-        $results = $this->fetch($this->endpoint("apiResourceAttributes"));
+        $results = $this->fetch($this->endpoint('apiResourceAttributes'));
 
         $this->assertArraySubset([
             [
@@ -123,19 +123,19 @@ class UseResponseAttributesTest extends BaseLaravelTest
                         ],
                     ],
                     'links' => [
-                        "first" => '/?page=1',
-                        "last" => null,
-                        "prev" => null,
-                        "next" => '/?page=2',
+                        'first' => '/?page=1',
+                        'last' => null,
+                        'prev' => null,
+                        'next' => '/?page=2',
                     ],
-                    "meta" => [
-                        "current_page" => 1,
-                        "from" => 1,
-                        "path" => '/',
-                        "per_page" => 1,
-                        "to" => 1,
+                    'meta' => [
+                        'current_page' => 1,
+                        'from' => 1,
+                        'path' => '/',
+                        'per_page' => 1,
+                        'to' => 1,
                     ],
-                    "a" => "b",
+                    'a' => 'b',
                 ]),
             ],
         ], $results);
@@ -152,7 +152,7 @@ class UseResponseAttributesTest extends BaseLaravelTest
             }
         });
 
-        $results = $this->fetch($this->endpoint("apiResourceAttributesWithNoModel"));
+        $results = $this->fetch($this->endpoint('apiResourceAttributesWithNoModel'));
 
         $this->assertArraySubset([
             [
@@ -175,19 +175,19 @@ class UseResponseAttributesTest extends BaseLaravelTest
                         ],
                     ],
                     'links' => [
-                        "first" => '/?page=1',
-                        "last" => null,
-                        "prev" => null,
-                        "next" => '/?page=2',
+                        'first' => '/?page=1',
+                        'last' => null,
+                        'prev' => null,
+                        'next' => '/?page=2',
                     ],
-                    "meta" => [
-                        "current_page" => 1,
-                        "from" => 1,
-                        "path" => '/',
-                        "per_page" => 1,
-                        "to" => 1,
+                    'meta' => [
+                        'current_page' => 1,
+                        'from' => 1,
+                        'path' => '/',
+                        'per_page' => 1,
+                        'to' => 1,
                     ],
-                    "a" => "b",
+                    'a' => 'b',
                 ]),
             ],
         ], $results);
@@ -196,27 +196,27 @@ class UseResponseAttributesTest extends BaseLaravelTest
     /** @test */
     public function can_parse_transformer_attributes()
     {
-        $results = $this->fetch($this->endpoint("transformerAttributes"));
+        $results = $this->fetch($this->endpoint('transformerAttributes'));
 
         $this->assertArraySubset([
             [
                 'status' => 200,
                 'content' => json_encode([
-                    "data" => [
+                    'data' => [
                         [
-                            "id" => 1,
-                            "description" => "Welcome on this test versions",
-                            "name" => "TestName",
+                            'id' => 1,
+                            'description' => 'Welcome on this test versions',
+                            'name' => 'TestName',
                         ],
                     ],
                     'meta' => [
-                        "pagination" => [
-                            "total" => 2,
-                            "count" => 1,
-                            "per_page" => 1,
-                            "current_page" => 1,
-                            "total_pages" => 2,
-                            "links" => ["next" => "/?page=2"],
+                        'pagination' => [
+                            'total' => 2,
+                            'count' => 1,
+                            'per_page' => 1,
+                            'current_page' => 1,
+                            'total_pages' => 2,
+                            'links' => ['next' => '/?page=2'],
                         ],
                     ],
                 ]),
@@ -227,54 +227,69 @@ class UseResponseAttributesTest extends BaseLaravelTest
     protected function fetch($endpoint): array
     {
         $strategy = new UseResponseAttributes(new DocumentationConfig([]));
+
         return $strategy($endpoint, []);
     }
 
     protected function endpoint(string $method): ExtractedEndpointData
     {
-        $endpoint = new class extends ExtractedEndpointData {
-            public function __construct(array $parameters = []) {}
+        $endpoint = new class extends ExtractedEndpointData
+        {
+            public function __construct(array $parameters = [])
+            {
+            }
         };
         $endpoint->controller = new ReflectionClass(ResponseAttributesTestController::class);
         $endpoint->method = $endpoint->controller->getMethod($method);
-        $endpoint->route = new Route(['POST'], "/somethingRandom", ['uses' => [ResponseAttributesTestController::class, $method]]);
+        $endpoint->route = new Route(['POST'], '/somethingRandom', ['uses' => [ResponseAttributesTestController::class, $method]]);
+
         return $endpoint;
     }
 }
 
 class ResponseAttributesTestController
 {
-    #[Response(["all" => "good"], 200, "Success")]
+    #[Response(['all' => 'good'], 200, 'Success')]
     #[Response('{"all":"good"}', 201)]
     public function plainResponseAttributes()
     {
-
     }
 
-    #[ResponseFromFile("tests/Fixtures/response_error_test.json", 401, ["merge" => "this"])]
+    #[ResponseFromFile('tests/Fixtures/response_error_test.json', 401, ['merge' => 'this'])]
     public function responseFileAttributes()
     {
-
     }
 
-    #[ResponseFromApiResource(TestUserApiResource::class, TestUser::class, collection: true,
-        factoryStates: ["state1", "random-state"], simplePaginate: 1, additional: ["a" => "b"])]
+    #[ResponseFromApiResource(
+        TestUserApiResource::class,
+        TestUser::class,
+        collection: true,
+        factoryStates: ['state1', 'random-state'],
+        simplePaginate: 1,
+        additional: ['a' => 'b']
+    )]
     public function apiResourceAttributes()
     {
-
     }
 
-    #[ResponseFromApiResource(TestUserApiResource::class, collection: true,
-        factoryStates: ["state1", "random-state"], simplePaginate: 1, additional: ["a" => "b"])]
+    #[ResponseFromApiResource(
+        TestUserApiResource::class,
+        collection: true,
+        factoryStates: ['state1', 'random-state'],
+        simplePaginate: 1,
+        additional: ['a' => 'b']
+    )]
     public function apiResourceAttributesWithNoModel()
     {
-
     }
 
-    #[ResponseFromTransformer(TestTransformer::class, TestModel::class, collection: true,
-        paginate: [IlluminatePaginatorAdapter::class, 1])]
+    #[ResponseFromTransformer(
+        TestTransformer::class,
+        TestModel::class,
+        collection: true,
+        paginate: [IlluminatePaginatorAdapter::class, 1]
+    )]
     public function transformerAttributes()
     {
-
     }
 }

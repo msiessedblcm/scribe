@@ -3,12 +3,12 @@
 namespace Knuckles\Scribe\Tests\Strategies\UrlParameters;
 
 use Closure;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Attributes\UrlParam;
 use Knuckles\Scribe\Extracting\Strategies\UrlParameters\GetFromUrlParamAttribute;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use PHPUnit\Framework\TestCase;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use ReflectionClass;
 use ReflectionFunction;
 
@@ -71,19 +71,19 @@ class GetFromUrlParamAttributeTest extends TestCase
                 'type' => 'integer',
                 'required' => true,
                 'description' => '',
-                'example' => 12
+                'example' => 12,
             ],
             'noExampleNoDescription' => [
                 'type' => 'string',
                 'required' => true,
                 'description' => '',
-                'example' => null
+                'example' => null,
             ],
             'noExample' => [
                 'type' => 'string',
                 'required' => true,
                 'description' => 'Something',
-                'example' => null
+                'example' => null,
             ],
         ], $results);
     }
@@ -110,43 +110,44 @@ class GetFromUrlParamAttributeTest extends TestCase
     protected function fetch($endpoint): array
     {
         $strategy = new GetFromUrlParamAttribute(new DocumentationConfig([]));
+
         return $strategy($endpoint, []);
     }
 
     protected function endpoint(Closure $configure): ExtractedEndpointData
     {
-        $endpoint = new class extends ExtractedEndpointData {
-            public function __construct(array $parameters = []) {}
+        $endpoint = new class extends ExtractedEndpointData
+        {
+            public function __construct(array $parameters = [])
+            {
+            }
         };
         $configure($endpoint);
+
         return $endpoint;
     }
-
 }
 
-
-#[UrlParam("id", description: "Will be overriden.")]
-#[UrlParam("lang", description: "Will be inherited.", required: false)]
+#[UrlParam('id', description: 'Will be overriden.')]
+#[UrlParam('lang', description: 'Will be inherited.', required: false)]
 class UrlParamAttributeTestController
 {
-    #[UrlParam("id", description: "The id of the order.")]
-    #[UrlParam("withType", required: false, type: "number", description: "With type, maybe.")]
-    #[UrlParam("withTypeDefinitely", "integer", "With type.")]
-    #[UrlParam("barebones")]
-    #[UrlParam("barebonesType", type: "number")]
-    #[UrlParam("barebonesOptional", required: false)]
-    #[UrlParam("withExampleOnly", example: "12")]
-    #[UrlParam("withExampleOnlyButTyped", type: "int", example: 12)]
-    #[UrlParam("noExampleNoDescription", example: "No-example.")]
-    #[UrlParam("noExample", description: "Something", example: "No-example")]
+    #[UrlParam('id', description: 'The id of the order.')]
+    #[UrlParam('withType', required: false, type: 'number', description: 'With type, maybe.')]
+    #[UrlParam('withTypeDefinitely', 'integer', 'With type.')]
+    #[UrlParam('barebones')]
+    #[UrlParam('barebonesType', type: 'number')]
+    #[UrlParam('barebonesOptional', required: false)]
+    #[UrlParam('withExampleOnly', example: '12')]
+    #[UrlParam('withExampleOnlyButTyped', type: 'int', example: 12)]
+    #[UrlParam('noExampleNoDescription', example: 'No-example.')]
+    #[UrlParam('noExample', description: 'Something', example: 'No-example')]
     public function methodWithAttributes()
     {
-
     }
 }
 
-#[UrlParam("a_parameter", required: false, type: "string", description: "Described", example: "en")]
+#[UrlParam('a_parameter', required: false, type: 'string', description: 'Described', example: 'en')]
 function functionWithAttributes()
 {
-
 }

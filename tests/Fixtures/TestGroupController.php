@@ -34,6 +34,7 @@ class TestGroupController
 
     /**
      * @group 13. Group 13
+     *
      * @subgroup SG B
      */
     public function action13a()
@@ -42,6 +43,7 @@ class TestGroupController
 
     /**
      * @group 13. Group 13
+     *
      * @subgroup SG C
      */
     public function action13b()
@@ -57,6 +59,7 @@ class TestGroupController
 
     /**
      * @group 13. Group 13
+     *
      * @subgroup SG B
      */
     public function action13d()
@@ -65,6 +68,7 @@ class TestGroupController
 
     /**
      * @group 13. Group 13
+     *
      * @subgroup SG A
      */
     public function action13e()

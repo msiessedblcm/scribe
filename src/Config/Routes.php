@@ -10,8 +10,7 @@ class Routes
         array $dingoVersions = ['v1'],
         array $alwaysInclude = [],
         array $alwaysExclude = [],
-    ): static
-    {
+    ): static {
         return new static(...get_defined_vars());
     }
 
@@ -21,7 +20,6 @@ class Routes
         public array $dingoVersions = [],
         public array $alwaysInclude = [],
         public array $alwaysExclude = []
-    )
-    {
+    ) {
     }
 }

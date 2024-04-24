@@ -42,9 +42,9 @@ class GenerateDocumentation extends Command
     {
         $this->bootstrap();
 
-        if (!empty($this->docConfig->get("default_group"))) {
-            $this->warn("It looks like you just upgraded to Scribe v4.");
-            $this->warn("Please run the upgrade command first: `php artisan scribe:upgrade`.");
+        if (! empty($this->docConfig->get('default_group'))) {
+            $this->warn('It looks like you just upgraded to Scribe v4.');
+            $this->warn('Please run the upgrade command first: `php artisan scribe:upgrade`.');
             exit(1);
         }
 
@@ -58,7 +58,7 @@ class GenerateDocumentation extends Command
         $configFileOrder = $this->docConfig->get('groups.order', []);
         $groupedEndpoints = Camel::prepareGroupedEndpointsForOutput($groupedEndpoints, $configFileOrder);
 
-        if (!count($userDefinedEndpoints)) {
+        if (! count($userDefinedEndpoints)) {
             // Update the example custom file if there were no custom endpoints
             $this->writeExampleCustomEndpoint();
         }
@@ -101,14 +101,15 @@ class GenerateDocumentation extends Command
         c::bootstrapOutput($this->output);
 
         $configName = $this->option('config');
-        if (!config($configName)) {
+        if (! config($configName)) {
             throw new \InvalidArgumentException("The specified config (config/{$configName}.php) doesn't exist.");
         }
 
         $this->paths = new PathConfig($configName);
-        if ($this->hasOption('scribe-dir') && !empty($this->option('scribe-dir'))) {
+        if ($this->hasOption('scribe-dir') && ! empty($this->option('scribe-dir'))) {
             $this->paths = new PathConfig(
-                $configName, scribeDir: $this->option('scribe-dir')
+                $configName,
+                scribeDir: $this->option('scribe-dir')
             );
         }
 
@@ -119,9 +120,9 @@ class GenerateDocumentation extends Command
         URL::forceRootUrl($baseUrl);
 
         $this->forcing = $this->option('force');
-        $this->shouldExtract = !$this->option('no-extraction');
+        $this->shouldExtract = ! $this->option('no-extraction');
 
-        if ($this->forcing && !$this->shouldExtract) {
+        if ($this->forcing && ! $this->shouldExtract) {
             throw new \InvalidArgumentException("Can't use --force and --no-extraction together.");
         }
 
@@ -133,6 +134,7 @@ class GenerateDocumentation extends Command
         foreach ($userDefinedEndpoints as $endpoint) {
             $indexOfGroupWhereThisEndpointShouldBeAdded = Arr::first(array_keys($groupedEndpoints), function ($key) use ($groupedEndpoints, $endpoint) {
                 $group = $groupedEndpoints[$key];
+
                 return $group['name'] === ($endpoint['metadata']['groupName'] ?? $this->docConfig->get('groups.default', ''));
             });
 
@@ -160,15 +162,18 @@ class GenerateDocumentation extends Command
 
     protected function upgradeConfigFileIfNeeded(): void
     {
-        if ($this->option('no-upgrade-check')) return;
+        if ($this->option('no-upgrade-check')) {
+            return;
+        }
 
-        $this->info("Checking for any pending upgrades to your config file...");
+        $this->info('Checking for any pending upgrades to your config file...');
         try {
-            if (!$this->laravel['files']->exists(
+            if (! $this->laravel['files']->exists(
                 $this->laravel->configPath($this->paths->configFileName())
             )
             ) {
-                $this->info("No config file to upgrade.");
+                $this->info('No config file to upgrade.');
+
                 return;
             }
 
@@ -177,36 +182,44 @@ class GenerateDocumentation extends Command
                 sampleNewConfigAbsolutePath: __DIR__ . '/../../config/scribe.php'
             )
                 ->dontTouch(
-                    'routes', 'example_languages', 'database_connections_to_transact', 'strategies', 'laravel.middleware',
-                    'postman.overrides', 'openapi.overrides', 'groups', 'examples.models_source'
-                );
+                    'routes',
+                    'example_languages',
+                    'database_connections_to_transact',
+                    'strategies',
+                    'laravel.middleware',
+                    'postman.overrides',
+                    'openapi.overrides',
+                    'groups',
+                    'examples.models_source'
+                )
+            ;
             $changes = $upgrader->dryRun();
-            if (!empty($changes)) {
+            if (! empty($changes)) {
                 $this->newLine();
 
                 $this->warn("You're using an updated version of Scribe, which added new items to the config file.");
-                $this->info("Here are the changes:");
+                $this->info('Here are the changes:');
                 foreach ($changes as $change) {
-                    $this->info($change["description"]);
+                    $this->info($change['description']);
                 }
 
-                if (!$this->input->isInteractive()) {
-                    $this->info("Run `php artisan scribe:upgrade` from an interactive terminal to update your config file automatically.");
-                    $this->info(sprintf("Or see the full changelog at: https://github.com/knuckleswtf/scribe/blob/%s/CHANGELOG.md,", Scribe::VERSION));
+                if (! $this->input->isInteractive()) {
+                    $this->info('Run `php artisan scribe:upgrade` from an interactive terminal to update your config file automatically.');
+                    $this->info(sprintf('Or see the full changelog at: https://github.com/knuckleswtf/scribe/blob/%s/CHANGELOG.md,', Scribe::VERSION));
+
                     return;
                 }
 
                 if ($this->confirm("Let's help you update your config file. Accept changes?")) {
                     $upgrader->upgrade();
-                    $this->info(sprintf("✔ Updated. See the full changelog: https://github.com/knuckleswtf/scribe/blob/%s/CHANGELOG.md", Scribe::VERSION));
+                    $this->info(sprintf('✔ Updated. See the full changelog: https://github.com/knuckleswtf/scribe/blob/%s/CHANGELOG.md', Scribe::VERSION));
                 }
             }
         } catch (\Throwable $e) {
-            $this->warn("Check failed with error:");
+            $this->warn('Check failed with error:');
             e::dumpExceptionIfVerbose($e);
-            $this->warn("This did not affect your docs. Please report this issue in the project repo: https://github.com/knuckleswtf/scribe");
+            $this->warn('This did not affect your docs. Please report this issue in the project repo: https://github.com/knuckleswtf/scribe');
         }
-
     }
 
     protected function sayGoodbye(bool $errored = false): void
@@ -216,7 +229,7 @@ class GenerateDocumentation extends Command
             if ($this->docConfig->get('laravel.add_routes')) {
                 $message .= 'Visit your docs at ' . url($this->docConfig->get('laravel.docs_url'));
             }
-        } else if (Str::endsWith(base_path('public'), 'public') && Str::startsWith($this->docConfig->get('static.output_path'), 'public/')) {
+        } elseif (Str::endsWith(base_path('public'), 'public') && Str::startsWith($this->docConfig->get('static.output_path'), 'public/')) {
             $message = 'Visit your docs at ' . url(str_replace('public/', '', $this->docConfig->get('static.output_path')));
         }
 
@@ -226,7 +239,7 @@ class GenerateDocumentation extends Command
         if ($errored) {
             c::warn('Generated docs, but encountered some errors while processing routes.');
             c::warn('Check the output above for details.');
-            if (empty($_SERVER["SCRIBE_TESTS"])) {
+            if (empty($_SERVER['SCRIBE_TESTS'])) {
                 exit(2);
             }
         }

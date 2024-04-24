@@ -21,16 +21,15 @@ class BaseLaravelTest extends TestCase
         ]);
         $app['config']->set('database.default', 'sqlite');
         $app['config']->set('database.connections.sqlite', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
         ScribeServiceProvider::$customTranslationLayerLoaded = false;
     }
 
     /**
-     * @param \Illuminate\Foundation\Application $app
-     *
+     * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
     protected function getPackageProviders($app)
@@ -41,6 +40,7 @@ class BaseLaravelTest extends TestCase
         if (class_exists(\Dingo\Api\Provider\LaravelServiceProvider::class)) {
             $providers[] = \Dingo\Api\Provider\LaravelServiceProvider::class;
         }
+
         return $providers;
     }
 

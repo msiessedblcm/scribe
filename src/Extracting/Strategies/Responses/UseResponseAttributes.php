@@ -32,9 +32,10 @@ class UseResponseAttributes extends PhpAttributeStrategy
 
     protected function extractFromAttributes(
         ExtractedEndpointData $endpointData,
-        array $attributesOnMethod, array $attributesOnFormRequest = [], array $attributesOnController = []
-    ): ?array
-    {
+        array $attributesOnMethod,
+        array $attributesOnFormRequest = [],
+        array $attributesOnController = []
+    ): ?array {
         $responses = [];
         foreach ([...$attributesOnController, ...$attributesOnFormRequest, ...$attributesOnMethod] as $attributeInstance) {
             /* @phpstan-ignore-next-line */
@@ -53,23 +54,23 @@ class UseResponseAttributes extends PhpAttributeStrategy
     {
         $modelToBeTransformed = $attributeInstance->modelToBeTransformed();
         if (empty($modelToBeTransformed)) {
-            c::warn(<<<WARN
+            c::warn(
+                <<<'WARN'
                 Couldn't detect an Eloquent API resource model from your ResponseFromApiResource.
                 Either specify a model using the `model:` parameter, or add an `@mixin` annotation in your resource's docblock.
                 WARN
             );
             $modelInstantiator = null;
         } else {
-            $modelInstantiator = fn() => $this->instantiateExampleModel($modelToBeTransformed, $attributeInstance->factoryStates, $attributeInstance->with);
+            $modelInstantiator = fn () => $this->instantiateExampleModel($modelToBeTransformed, $attributeInstance->factoryStates, $attributeInstance->with);
         }
 
         $pagination = [];
         if ($attributeInstance->paginate) {
             $pagination = [$attributeInstance->paginate];
-        } else if ($attributeInstance->simplePaginate) {
+        } elseif ($attributeInstance->simplePaginate) {
             $pagination = [$attributeInstance->simplePaginate, 'simple'];
         }
-
 
         $this->startDbTransaction();
         $content = ApiResourceResponseTools::fetch(
@@ -92,18 +93,24 @@ class UseResponseAttributes extends PhpAttributeStrategy
 
     protected function getTransformerResponse(ResponseFromTransformer $attributeInstance)
     {
-        $modelInstantiator = fn() => $this->instantiateExampleModel(
-            $attributeInstance->model, $attributeInstance->factoryStates, $attributeInstance->with,
+        $modelInstantiator = fn () => $this->instantiateExampleModel(
+            $attributeInstance->model,
+            $attributeInstance->factoryStates,
+            $attributeInstance->with,
             (new ReflectionClass($attributeInstance->name))->getMethod('transform')
         );
 
         $pagination = $attributeInstance->paginate ? [
-            'perPage' => $attributeInstance->paginate[1] ?? null, 'adapter' => $attributeInstance->paginate[0]
+            'perPage' => $attributeInstance->paginate[1] ?? null, 'adapter' => $attributeInstance->paginate[0],
         ] : [];
         $this->startDbTransaction();
         $content = TransformerResponseTools::fetch(
-            $attributeInstance->name, $attributeInstance->collection, $modelInstantiator,
-            $pagination, $attributeInstance->resourceKey, $this->config->get('fractal.serializer'),
+            $attributeInstance->name,
+            $attributeInstance->collection,
+            $modelInstantiator,
+            $pagination,
+            $attributeInstance->resourceKey,
+            $this->config->get('fractal.serializer'),
         );
         $this->endDbTransaction();
 
@@ -113,5 +120,4 @@ class UseResponseAttributes extends PhpAttributeStrategy
             'content' => $content,
         ];
     }
-
 }

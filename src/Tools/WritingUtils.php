@@ -20,12 +20,9 @@ class WritingUtils
     /**
      * Print a value as valid PHP, handling arrays and proper indentation.
      *
-     * @param mixed $value
-     * @param int $indentationLevel
+     * @param  mixed  $value
      *
-     * @return string
      * @throws \Symfony\Component\VarExporter\Exception\ExceptionInterface
-     *
      */
     public static function printPhpValue($value, int $indentationLevel = 0): string
     {
@@ -53,27 +50,28 @@ class WritingUtils
 
     public static function printSingleQueryParamsAsString(string $prefix, string|int $key, mixed $parameters, bool $firstLevel): string
     {
-        if (!is_array($parameters)) {
+        if (! is_array($parameters)) {
             if ($firstLevel) {
-                return sprintf("%s=%s&", urlencode($key), urlencode($parameters));
+                return sprintf('%s=%s&', urlencode($key), urlencode($parameters));
             } else {
                 if (is_string($key)) {
-                    return sprintf("%s[%s]=%s&", $prefix, urlencode($key), urlencode($parameters));
+                    return sprintf('%s[%s]=%s&', $prefix, urlencode($key), urlencode($parameters));
                 } else {
-                    return sprintf("%s[]=%s&", $prefix, urlencode($parameters));
+                    return sprintf('%s[]=%s&', $prefix, urlencode($parameters));
                 }
             }
         } else {
             if ($firstLevel) {
                 $newPrefix = urlencode($key);
             } else {
-                $newPrefix = sprintf("%s[%s]", $prefix, urlencode($key));
+                $newPrefix = sprintf('%s[%s]', $prefix, urlencode($key));
             }
             $query = '';
             foreach ($parameters as $item => $itemValue) {
                 $query .= static::printSingleQueryParamsAsString($newPrefix, $item, $itemValue, false);
             }
         }
+
         return $query;
     }
 
@@ -85,55 +83,46 @@ class WritingUtils
      *   custom indentation, line endings etc.
      * Expands/simplifies arrays {key: [1, 2,]} becomes {"key[0]": "1","key[1]": "2"}
      * Expands hashes {key: {a: 1, b: 2, c: {e: 3}}} becomes {"key[a]": "1", "key[b]": "2", "key[c][e]": "3"}
-     *
-     * @param array $cleanQueryParams
-     * @param string $quote
-     * @param string $delimiter
-     * @param int $spacesIndentation
-     * @param string $braces
-     * @param int $closingBraceIndentation
-     * @param string $startLinesWith
-     * @param string $endLinesWith
-     *
-     * @return string
      */
     public static function printQueryParamsAsKeyValue(
         array $cleanQueryParams,
         string $quote = '"',
-        string $delimiter = ":",
+        string $delimiter = ':',
         int $spacesIndentation = 4,
-        string $braces = "{}",
+        string $braces = '{}',
         int $closingBraceIndentation = 0,
         string $startLinesWith = '',
         string $endLinesWith = ','
     ): string {
         $output = isset($braces[0]) ? "{$braces[0]}\n" : '';
         foreach ($cleanQueryParams as $parameter => $value) {
-            $output .= self::printSingleQueryParamAsKeyValue($value, $spacesIndentation, $startLinesWith, $quote,
-                $parameter, $delimiter, $endLinesWith);
+            $output .= self::printSingleQueryParamAsKeyValue(
+                $value,
+                $spacesIndentation,
+                $startLinesWith,
+                $quote,
+                $parameter,
+                $delimiter,
+                $endLinesWith
+            );
         }
 
-        $closing = isset($braces[1]) ? str_repeat(" ", $closingBraceIndentation) . "{$braces[1]}" : '';
+        $closing = isset($braces[1]) ? str_repeat(' ', $closingBraceIndentation) . "{$braces[1]}" : '';
+
         return $output . $closing;
     }
 
-    /**
-     * @param mixed $value
-     * @param int $spacesIndentation
-     * @param string $startLinesWith
-     * @param string $quote
-     * @param string $parameter
-     * @param string $delimiter
-     * @param string $endLinesWith
-     * @return string
-     */
     protected static function printSingleQueryParamAsKeyValue(
-        mixed $value, int $spacesIndentation, string $startLinesWith, string $quote,
-        string $parameter, string $delimiter, string $endLinesWith
+        mixed $value,
+        int $spacesIndentation,
+        string $startLinesWith,
+        string $quote,
+        string $parameter,
+        string $delimiter,
+        string $endLinesWith
     ): string {
-
-        if (!is_array($value)) {
-            $output = str_repeat(" ", $spacesIndentation);
+        if (! is_array($value)) {
+            $output = str_repeat(' ', $spacesIndentation);
             // Example: -----"param_name": "value"----
             $formattedValue = is_bool($value) ? ($value ? 1 : 0) : $value;
             $output .= "$startLinesWith$quote$parameter$quote$delimiter $quote$formattedValue$quote$endLinesWith\n";
@@ -149,15 +138,33 @@ class WritingUtils
             foreach ($value as $item => $itemValue) {
                 $parameterString = sprintf('%s[%s]', $parameter, $item);
                 if (is_array($itemValue)) {
-                    $output .= static::printSingleQueryParamAsKeyValue($itemValue, $spacesIndentation, $startLinesWith,
-                        $quote, $parameterString, $delimiter, $endLinesWith);
+                    $output .= static::printSingleQueryParamAsKeyValue(
+                        $itemValue,
+                        $spacesIndentation,
+                        $startLinesWith,
+                        $quote,
+                        $parameterString,
+                        $delimiter,
+                        $endLinesWith
+                    );
                 } else {
-                    $output .= str_repeat(" ", $spacesIndentation);
-                    $output .= sprintf("%s%s%s%s%s %s%s%s%s\n", $startLinesWith, $quote, $parameterString, $quote,
-                        $delimiter, $quote, $itemValue, $quote, $endLinesWith);
+                    $output .= str_repeat(' ', $spacesIndentation);
+                    $output .= sprintf(
+                        "%s%s%s%s%s %s%s%s%s\n",
+                        $startLinesWith,
+                        $quote,
+                        $parameterString,
+                        $quote,
+                        $delimiter,
+                        $quote,
+                        $itemValue,
+                        $quote,
+                        $endLinesWith
+                    );
                 }
             }
         }
+
         return $output;
     }
 
@@ -167,14 +174,12 @@ class WritingUtils
      * Lists like ("filter", ["haha"]) becomes ["filter[]" => "haha"]
      * Maps like ("filter", ["name" => "john", "age" => "12"]) become ["filter[name]" => "john", "filter[age]" => 12]
      *
-     * @param string $parameter The name of the parameter
-     * @param mixed $value Value of the parameter
-     *
-     * @return array
+     * @param  string  $parameter The name of the parameter
+     * @param  mixed  $value Value of the parameter
      */
     public static function getParameterNamesAndValuesForFormData(string $parameter, $value): array
     {
-        if (!is_array($value)) {
+        if (! is_array($value)) {
             return [$parameter => $value];
         }
 
@@ -189,8 +194,10 @@ class WritingUtils
                     $paramName = $parameter . '[]' . $fieldName;
                     $params[$paramName] = $itemValue;
                 }
+
                 return $params;
             }
+
             return [$parameter . '[]' => $value[0]];
         }
 
@@ -207,17 +214,18 @@ class WritingUtils
                 $params[$parameter . "[$item]"] = $itemValue;
             }
         }
+
         return $params;
     }
 
     public static function getSampleBody(array $nestedBodyParameters)
     {
-        if (!empty($nestedBodyParameters['[]'])) {
+        if (! empty($nestedBodyParameters['[]'])) {
             return [self::getSampleBody($nestedBodyParameters['[]']['__fields'])];
         }
 
         return array_map(function ($param) {
-            if (!empty($param['__fields'])) {
+            if (! empty($param['__fields'])) {
                 if ($param['type'] === 'object[]') {
                     return [self::getSampleBody($param['__fields'])];
                 }
@@ -236,19 +244,15 @@ class WritingUtils
      * [1] -> "1"
      * Each value is wrapped in HTML <code> tags, so you actually get "<code>1</code>, <code>2</code>, or
      * <code>3</code>"
-     *
-     * @param array $list
-     *
-     * @return string
      */
-    public static function getListOfValuesAsFriendlyHtmlString(array $list = [], string $conjunction = "or"): string
+    public static function getListOfValuesAsFriendlyHtmlString(array $list = [], string $conjunction = 'or'): string
     {
         return match (count($list)) {
             1 => "<code>{$list[0]}</code>",
             2 => "<code>{$list[0]}</code> $conjunction <code>{$list[1]}</code>",
-            default => "<code>"
+            default => '<code>'
                 . implode('</code>, <code>', array_slice($list, 0, -1))
-                . "</code>, $conjunction <code>" . end($list) . "</code>",
+                . "</code>, $conjunction <code>" . end($list) . '</code>',
         };
     }
 
@@ -257,7 +261,8 @@ class WritingUtils
      */
     public static function getVersionedAsset(string $assetPath): string
     {
-        $index = strrpos($assetPath, ".");
+        $index = strrpos($assetPath, '.');
+
         return substr_replace($assetPath, '-' . Scribe::VERSION, $index, 0);
     }
 }

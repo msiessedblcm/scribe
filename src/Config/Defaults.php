@@ -72,5 +72,4 @@ class Defaults
             Strategies\ResponseFields\GetFromResponseFieldTag::class,
         ]);
     }
-
 }

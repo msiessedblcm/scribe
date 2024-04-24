@@ -16,8 +16,8 @@ class Header
     public function toArray()
     {
         return [
-            "name" => $this->name,
-            "example" => $this->example,
+            'name' => $this->name,
+            'example' => $this->example,
         ];
     }
 }

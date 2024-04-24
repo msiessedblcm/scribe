@@ -9,12 +9,11 @@ class Authenticated
 {
     public function __construct(
         public ?bool $authenticated = true,
-    )
-    {
+    ) {
     }
 
     public function toArray()
     {
-        return ["authenticated" => $this->authenticated];
+        return ['authenticated' => $this->authenticated];
     }
 }

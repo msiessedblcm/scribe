@@ -19,7 +19,7 @@ class GetFromLaravelAPI extends Strategy
     {
         if (Utils::isLumen()) {
             return (new GetFromLumenAPI($this->config))($endpointData, $routeRules);
-        };
+        }
 
         $parameters = [];
 
@@ -33,7 +33,7 @@ class GetFromLaravelAPI extends Strategy
             $parameters[$name] = [
                 'name' => $name,
                 'description' => $this->inferUrlParamDescription($endpointData->uri, $name),
-                'required' => !$isOptional,
+                'required' => ! $isOptional,
             ];
         }
 
@@ -53,15 +53,17 @@ class GetFromLaravelAPI extends Strategy
         // If $url is sth like /users/{id}, return "The ID of the user."
         // If $url is sth like /anything/{user_id}, return "The ID of the user."
 
-        $strategies = collect(["id", "slug"])->map(function ($name) {
-            $friendlyName = $name === 'id' ? "ID" : $name;
+        $strategies = collect(['id', 'slug'])->map(function ($name) {
+            $friendlyName = $name === 'id' ? 'ID' : $name;
 
             return function ($url, $paramName) use ($name, $friendlyName) {
                 if ($paramName == $name) {
                     $thing = $this->getNameOfUrlThing($url, $paramName);
+
                     return "The $friendlyName of the $thing.";
-                } else if (Str::is("*_$name", $paramName)) {
-                    $thing = str_replace(["_", "-"], " ", str_replace("_$name", '', $paramName));
+                } elseif (Str::is("*_$name", $paramName)) {
+                    $thing = str_replace(['_', '-'], ' ', str_replace("_$name", '', $paramName));
+
                     return "The $friendlyName of the $thing.";
                 }
             };
@@ -99,9 +101,9 @@ class GetFromLaravelAPI extends Strategy
             // Find the param name. In our normalized URL, argument $user might be param {user}, or {user_id}, or {id},
             if (isset($parameters[$argumentName])) {
                 $paramName = $argumentName;
-            } else if (isset($parameters["{$argumentName}_$routeKey"])) {
+            } elseif (isset($parameters["{$argumentName}_$routeKey"])) {
                 $paramName = "{$argumentName}_$routeKey";
-            } else if (isset($parameters[$routeKey])) {
+            } elseif (isset($parameters[$routeKey])) {
                 $paramName = $routeKey;
             } else {
                 continue;
@@ -112,7 +114,9 @@ class GetFromLaravelAPI extends Strategy
 
         // Next, non-Eloquent-bound parameters. They might still be Eloquent models, but model binding wasn't used.
         foreach ($parameters as $name => $data) {
-            if (isset($data['type'])) continue;
+            if (isset($data['type'])) {
+                continue;
+            }
 
             // If the url is /things/{id}, try to find a Thing model
             $urlThing = $this->getNameOfUrlThing($endpointData->uri, $name);
@@ -135,8 +139,8 @@ class GetFromLaravelAPI extends Strategy
             } catch (Throwable) {
                 $parameters[$paramName]['example'] = null;
             }
-
         }
+
         return $parameters;
     }
 
@@ -160,7 +164,7 @@ class GetFromLaravelAPI extends Strategy
     {
         foreach ($parameters as $name => $parameter) {
             if (empty($parameter['type'])) {
-                $parameters[$name]['type'] = "string";
+                $parameters[$name]['type'] = 'string';
             }
 
             if (($parameter['example'] ?? null) === null) {
@@ -171,6 +175,7 @@ class GetFromLaravelAPI extends Strategy
                     : $this->generateDummyValue($parameters[$name]['type'], hints: ['name' => $name]);
             }
         }
+
         return $parameters;
     }
 
@@ -180,16 +185,14 @@ class GetFromLaravelAPI extends Strategy
      * - animals/cats/{id} -> "cat"
      * - users/{user_id}/contracts -> "user"
      *
-     * @param string $url
-     * @param string $paramName
-     * @param string|null $alternateParamName A second paramName to try, if the original paramName isn't in the URL.
-     *
-     * @return string|null
+     * @param  string|null  $alternateParamName A second paramName to try, if the original paramName isn't in the URL.
      */
     protected function getNameOfUrlThing(string $url, string $paramName, string $alternateParamName = null): ?string
     {
-        $parts = explode("/", $url);
-        if (count($parts) === 1) return null; // URL was "/{thing}"
+        $parts = explode('/', $url);
+        if (count($parts) === 1) {
+            return null;
+        } // URL was "/{thing}"
 
         $paramIndex = array_search("{{$paramName}}", $parts);
 
@@ -197,19 +200,17 @@ class GetFromLaravelAPI extends Strategy
             $paramIndex = array_search("{{$alternateParamName}}", $parts);
         }
 
-        if ($paramIndex === false || $paramIndex === 0) return null;
+        if ($paramIndex === false || $paramIndex === 0) {
+            return null;
+        }
 
         $things = $parts[$paramIndex - 1];
         // Replace underscores/hyphens, so "side_projects" becomes "side project"
-        return str_replace(["_", "-"], " ", Str::singular($things));
+        return str_replace(['_', '-'], ' ', Str::singular($things));
     }
 
     /**
      * Given a URL "thing", like the "cat" in /cats/{id}, try to locate a Cat model.
-     *
-     * @param string $urlThing
-     *
-     * @return Model|null
      */
     protected function findModelFromUrlThing(string $urlThing): ?Model
     {
@@ -224,6 +225,7 @@ class GetFromLaravelAPI extends Strategy
             } catch (\Error) { // It might be an enum or some other non-instantiable class
                 return null;
             }
+
             return $instance instanceof Model ? $instance : null;
         }
 

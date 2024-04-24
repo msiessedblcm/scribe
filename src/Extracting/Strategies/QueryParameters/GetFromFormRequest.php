@@ -14,11 +14,10 @@ class GetFromFormRequest extends GetFromFormRequestBase
         // Only use this FormRequest for query params if there's "Query parameters" in the docblock
         // Or there's a queryParameters() method
         $formRequestDocBlock = $formRequestReflectionClass->getDocComment();
-        if (strpos(strtolower($formRequestDocBlock), "query parameters") !== false) {
+        if (strpos(strtolower($formRequestDocBlock), 'query parameters') !== false) {
             return true;
         }
 
         return parent::isFormRequestMeantForThisStrategy($formRequestReflectionClass);
     }
 }
-

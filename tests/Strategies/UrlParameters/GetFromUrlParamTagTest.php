@@ -2,11 +2,11 @@
 
 namespace Knuckles\Scribe\Tests\Strategies\UrlParameters;
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Scribe\Extracting\Strategies\UrlParameters\GetFromUrlParamTag;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use Mpociot\Reflection\DocBlock\Tag;
 use PHPUnit\Framework\TestCase;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 class GetFromUrlParamTagTest extends TestCase
 {
@@ -77,21 +77,20 @@ class GetFromUrlParamTagTest extends TestCase
                 'type' => 'integer',
                 'required' => false,
                 'description' => '',
-                'example' => 12
+                'example' => 12,
             ],
             'noExampleNoDescription' => [
                 'type' => 'string',
                 'required' => false,
                 'description' => '',
-                'example' => null
+                'example' => null,
             ],
             'noExample' => [
                 'type' => 'string',
                 'required' => false,
                 'description' => 'Something',
-                'example' => null
+                'example' => null,
             ],
         ], $results);
     }
-
 }

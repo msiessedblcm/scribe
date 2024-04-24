@@ -11,8 +11,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
-use Knuckles\Scribe\Tools\ConsoleOutputUtils as c;
-use Knuckles\Scribe\Tools\ErrorHandlingUtils as e;
 use Knuckles\Scribe\Tools\Utils;
 use Mpociot\Reflection\DocBlock;
 use Mpociot\Reflection\DocBlock\Tag;
@@ -21,14 +19,24 @@ use ReflectionClass;
 class ApiResourceResponseTools
 {
     public static function fetch(
-        string $apiResourceClass, bool $isCollection, ?callable $modelInstantiator,
-        ExtractedEndpointData $endpointData, array $pagination, array $additionalData, ?string $key
-    )
-    {
+        string $apiResourceClass,
+        bool $isCollection,
+        ?callable $modelInstantiator,
+        ExtractedEndpointData $endpointData,
+        array $pagination,
+        array $additionalData,
+        ?string $key
+    ) {
         $resource = static::getApiResourceOrCollectionInstance(
-            $apiResourceClass, $isCollection, $modelInstantiator, $pagination, $additionalData
+            $apiResourceClass,
+            $isCollection,
+            $modelInstantiator,
+            $key,
+            $pagination,
+            $additionalData
         );
         $response = static::callApiResourceAndGetResponse($resource, $endpointData, $key);
+
         return $response->getContent();
     }
 
@@ -39,23 +47,26 @@ class ApiResourceResponseTools
         $request = Request::create($uri, $method);
         $request->headers->add(['Accept' => 'application/json']);
         // Set the route properly, so it works for users who have code that checks for the route.
-        $request->setRouteResolver(fn() => $endpointData->route);
+        $request->setRouteResolver(fn () => $endpointData->route);
 
         $previousBoundRequest = app('request');
-        app()->bind('request', fn() => $request);
+        app()->bind('request', fn () => $request);
 
-        $response = $key ? new JsonResponse([$key => $resource->toArray($request)]) : new JsonResponse($resource->toArray($request));
+        $response = $key ? $resource->toResponse($request) : new JsonResponse($resource->toArray($request));
 
-        app()->bind('request', fn() => $previousBoundRequest);
+        app()->bind('request', fn () => $previousBoundRequest);
 
         return $response;
     }
 
     public static function getApiResourceOrCollectionInstance(
-        string $apiResourceClass, bool $isCollection, ?callable $modelInstantiator,
-        array $paginationStrategy = [], array $additionalData = []
-    ): JsonResource
-    {
+        string $apiResourceClass,
+        bool $isCollection,
+        ?callable $modelInstantiator,
+        ?string $key,
+        array $paginationStrategy = [],
+        array $additionalData = []
+    ): JsonResource {
         // If the API Resource uses an empty $resource (e.g. an empty array), the $modelInstantiator will be null
         // See https://github.com/knuckleswtf/scribe/issues/652
         $modelInstance = is_callable($modelInstantiator) ? $modelInstantiator() : [];
@@ -78,8 +89,10 @@ class ApiResourceResponseTools
             if (count($paginationStrategy) == 1) {
                 $perPage = $paginationStrategy[0];
                 $paginator = new LengthAwarePaginator(
-                // For some reason, the LengthAware paginator needs only first page items to work correctly
-                    collect($models)->slice(0, $perPage), count($models), $perPage
+                    // For some reason, the LengthAware paginator needs only first page items to work correctly
+                    collect($models)->slice(0, $perPage),
+                    count($models),
+                    $perPage
                 );
                 $list = $paginator;
             } elseif (count($paginationStrategy) == 2 && $paginationStrategy[1] == 'simple') {
@@ -93,6 +106,7 @@ class ApiResourceResponseTools
             $resource = $resource instanceof ResourceCollection
                 ? new $apiResourceClass($list) : $apiResourceClass::collection($list);
         }
+        $resource::$wrap = $key ?? $resource::$wrap;
 
         return $resource->additional($additionalData);
     }
@@ -100,7 +114,7 @@ class ApiResourceResponseTools
     /**
      * Check if the ApiResource class has an `@mixin` docblock, and fetch the model from there.
      */
-    public static function tryToInferApiResourceModel(string $apiResourceClass): string|null
+    public static function tryToInferApiResourceModel(string $apiResourceClass): ?string
     {
         $class = new ReflectionClass($apiResourceClass);
         $docBlock = new DocBlock($class->getDocComment() ?: '');

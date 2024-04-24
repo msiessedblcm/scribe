@@ -13,6 +13,7 @@ class ResponseFileTools
 
         if (is_string($merge)) {
             $json = str_replace("'", '"', $merge);
+
             return json_encode(array_merge(json_decode($content, true), json_decode($json, true)));
         }
 
@@ -23,14 +24,15 @@ class ResponseFileTools
 
     protected static function getFileContents($filePath): string
     {
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             // Try Laravel storage folder
-            if (!file_exists(storage_path($filePath))) {
+            if (! file_exists(storage_path($filePath))) {
                 throw new \InvalidArgumentException("@responseFile {$filePath} does not exist");
             }
 
             $filePath = storage_path($filePath);
         }
+
         return file_get_contents($filePath, true);
     }
 }

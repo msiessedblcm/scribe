@@ -3,6 +3,7 @@
 namespace Knuckles\Scribe\Tests\Strategies;
 
 use Closure;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Extracting\Strategies\BodyParameters;
 use Knuckles\Scribe\Extracting\Strategies\QueryParameters;
@@ -10,7 +11,6 @@ use Knuckles\Scribe\Tests\BaseLaravelTest;
 use Knuckles\Scribe\Tests\Fixtures;
 use Knuckles\Scribe\Tests\Fixtures\TestController;
 use Knuckles\Scribe\Tools\DocumentationConfig;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 class GetFromInlineValidatorTest extends BaseLaravelTest
 {
@@ -223,24 +223,28 @@ class GetFromInlineValidatorTest extends BaseLaravelTest
 
     protected function endpoint(Closure $configure): ExtractedEndpointData
     {
-        $endpoint = new class extends ExtractedEndpointData {
+        $endpoint = new class extends ExtractedEndpointData
+        {
             public function __construct(array $parameters = [])
             {
             }
         };
         $configure($endpoint);
+
         return $endpoint;
     }
 
     protected function fetchViaBodyParams(ExtractedEndpointData $endpoint): ?array
     {
         $strategy = new BodyParameters\GetFromInlineValidator(new DocumentationConfig([]));
+
         return $strategy($endpoint, []);
     }
 
     protected function fetchViaQueryParams(ExtractedEndpointData $endpoint): ?array
     {
         $strategy = new QueryParameters\GetFromInlineValidator(new DocumentationConfig([]));
+
         return $strategy($endpoint, []);
     }
 }

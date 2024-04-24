@@ -9,6 +9,6 @@ class Unauthenticated
 {
     public function toArray()
     {
-        return ["authenticated" => false];
+        return ['authenticated' => false];
     }
 }

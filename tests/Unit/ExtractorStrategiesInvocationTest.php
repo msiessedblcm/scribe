@@ -6,7 +6,6 @@ use Illuminate\Routing\Route;
 use Knuckles\Camel\Extraction\ExtractedEndpointData;
 use Knuckles\Scribe\Extracting\Extractor;
 use Knuckles\Scribe\Extracting\Strategies\Strategy;
-use Knuckles\Scribe\ScribeServiceProvider;
 use Knuckles\Scribe\Tests\BaseUnitTest;
 use Knuckles\Scribe\Tests\Fixtures\TestController;
 use Knuckles\Scribe\Tools\DocumentationConfig;
@@ -52,7 +51,7 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
                     [
                         'override',
                         ['Content-Type' => 'application/xml'],
-                    ]
+                    ],
                 ],
                 'bodyParameters' => [],
             ],
@@ -66,7 +65,6 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
         ], $endpointData->headers);
     }
 
-
     /** @test */
     public function supports_strategy_settings_tuples()
     {
@@ -76,7 +74,7 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
                     [
                         DummyHeaderStrategy::class,
                         ['use_this_content_type' => 'text/plain'],
-                    ]
+                    ],
                 ],
                 'bodyParameters' => [],
             ],
@@ -96,7 +94,7 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
         $config = [
             'strategies' => [
                 'bodyParameters' => [
-                    [EmptyStrategy1::class, ['only' => 'GET /test']]
+                    [EmptyStrategy1::class, ['only' => 'GET /test']],
                 ],
             ],
         ];
@@ -115,7 +113,7 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
         $config = [
             'strategies' => [
                 'bodyParameters' => [
-                    [EmptyStrategy1::class, ['except' => 'GET /api*']]
+                    [EmptyStrategy1::class, ['except' => 'GET /api*']],
                 ],
             ],
         ];
@@ -211,6 +209,7 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
 
     /**
      * @test
+     *
      * @dataProvider responsesToSort
      */
     public function sort_responses_by_status_code(array $responses)
@@ -253,11 +252,14 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
     }
 
     protected function processRoute(
-        array $config, $routeMethod = "GET", $routePath = "/api/test", $routeName = "dummy"
-    ): ExtractedEndpointData
-    {
+        array $config,
+        $routeMethod = 'GET',
+        $routePath = '/api/test',
+        $routeName = 'dummy'
+    ): ExtractedEndpointData {
         $route = $this->createRoute($routeMethod, $routePath, $routeName);
         $extractor = new Extractor(new DocumentationConfig($config));
+
         return $extractor->processRoute($route);
     }
 
@@ -267,7 +269,6 @@ class ExtractorStrategiesInvocationTest extends BaseUnitTest
     }
 }
 
-
 class EmptyStrategy1 extends Strategy
 {
     public static $called = false;
@@ -275,6 +276,7 @@ class EmptyStrategy1 extends Strategy
     public function __invoke(ExtractedEndpointData $endpointData, array $routeRules = []): ?array
     {
         static::$called = true;
+
         return [];
     }
 }
@@ -286,6 +288,7 @@ class EmptyStrategy2 extends Strategy
     public function __invoke(ExtractedEndpointData $endpointData, array $routeRules = []): ?array
     {
         static::$called = true;
+
         return [];
     }
 }
@@ -308,6 +311,7 @@ class NotDummyMetadataStrategy extends Strategy
     public function __invoke(ExtractedEndpointData $endpointData, array $routeRules = []): ?array
     {
         static::$called = true;
+
         return [
             'groupName' => 'notdummy',
             'groupDescription' => 'notdummy',

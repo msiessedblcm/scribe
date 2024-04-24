@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 
 trait ParamHelpers
 {
-
     protected function getFakeFactoryByName(string $name): ?\Closure
     {
         $faker = $this->getFaker();
@@ -25,13 +24,13 @@ trait ParamHelpers
         };
 
         return match ($normalizedName) {
-            'email' => fn() => $faker->safeEmail(),
-            'password', 'pwd' => fn() => $faker->password(),
-            'url' => fn() => $faker->url(),
-            'description' => fn() => $faker->sentence(),
-            'uuid' => fn() => $faker->uuid(),
-            'locale' => fn() => $faker->locale(),
-            'timezone' => fn() => $faker->timezone(),
+            'email' => fn () => $faker->safeEmail(),
+            'password', 'pwd' => fn () => $faker->password(),
+            'url' => fn () => $faker->url(),
+            'description' => fn () => $faker->sentence(),
+            'uuid' => fn () => $faker->uuid(),
+            'locale' => fn () => $faker->locale(),
+            'timezone' => fn () => $faker->timezone(),
             default => null,
         };
     }
@@ -42,12 +41,13 @@ trait ParamHelpers
         if ($seed = $this->config->get('examples.faker_seed')) {
             $faker->seed($seed);
         }
+
         return $faker;
     }
 
     protected function generateDummyValue(string $type, array $hints = [])
     {
-        if(!empty($hints['enumValues'])) {
+        if (! empty($hints['enumValues'])) {
             return Arr::random($hints['enumValues']);
         }
 
@@ -70,34 +70,42 @@ trait ParamHelpers
         if ($isListType) {
             // Return a one-array item for a list by default.
             return $size
-                ? fn() => [$this->generateDummyValue($baseType, range(0, min($size - 1, 5)))]
-                : fn() => [$this->generateDummyValue($baseType, $hints)];
+                ? fn () => [$this->generateDummyValue($baseType, range(0, min($size - 1, 5)))]
+                : fn () => [$this->generateDummyValue($baseType, $hints)];
         }
 
         if (($hints['name'] ?? false) && $baseType != 'file') {
             $fakeFactoryByName = $this->getFakeFactoryByName($hints['name']);
-            if ($fakeFactoryByName) return $fakeFactoryByName;
+            if ($fakeFactoryByName) {
+                return $fakeFactoryByName;
+            }
         }
 
         $faker = $this->getFaker();
         $min = $hints['min'] ?? null;
         $max = $hints['max'] ?? null;
         // If max and min were provided, the override size.
-        $isExactSize = is_null($min) && is_null($max) && !is_null($size);
+        $isExactSize = is_null($min) && is_null($max) && ! is_null($size);
 
         $fakeFactoriesByType = [
             'integer' => function () use ($size, $isExactSize, $max, $faker, $min) {
-                if ($isExactSize) return $size;
-                return $max ? $faker->numberBetween((int)$min, (int)$max) : $faker->numberBetween(1, 20);
+                if ($isExactSize) {
+                    return $size;
+                }
+
+                return $max ? $faker->numberBetween((int) $min, (int) $max) : $faker->numberBetween(1, 20);
             },
             'number' => function () use ($size, $isExactSize, $max, $faker, $min) {
-                if ($isExactSize) return $size;
-                return $max ? $faker->numberBetween((int)$min, (int)$max) : $faker->randomFloat();
+                if ($isExactSize) {
+                    return $size;
+                }
+
+                return $max ? $faker->numberBetween((int) $min, (int) $max) : $faker->randomFloat();
             },
-            'boolean' => fn() => $faker->boolean(),
-            'string' => fn() => $size ? $faker->lexify(str_repeat("?", $size)) : $faker->word(),
-            'object' => fn() => [],
-            'file' => fn() => UploadedFile::fake()->create('test.jpg')->size($size ?: 10),
+            'boolean' => fn () => $faker->boolean(),
+            'string' => fn () => $size ? $faker->lexify(str_repeat('?', $size)) : $faker->word(),
+            'object' => fn () => [],
+            'file' => fn () => UploadedFile::fake()->create('test.jpg')->size($size ?: 10),
         ];
 
         return $fakeFactoriesByType[$baseType] ?? $fakeFactoriesByType['string'];
@@ -128,15 +136,14 @@ trait ParamHelpers
             'string',
             'object',
         ];
+
         return in_array(str_replace('[]', '', $type), $types);
     }
 
     /**
      * Cast a value to a specified type.
      *
-     * @param mixed $value
-     * @param string $type
-     *
+     * @param  mixed  $value
      * @return mixed
      */
     protected function castToType($value, string $type)
@@ -145,12 +152,13 @@ trait ParamHelpers
             return null;
         }
 
-        if ($type === "array") {
-            $type = "string[]";
+        if ($type === 'array') {
+            $type = 'string[]';
         }
 
         if (Str::endsWith($type, '[]')) {
             $baseType = strtolower(substr($type, 0, strlen($type) - 2));
+
             return is_array($value) ? array_map(function ($v) use ($baseType) {
                 return $this->castToType($v, $baseType);
             }, $value) : json_decode($value);
@@ -189,18 +197,16 @@ trait ParamHelpers
      * to a number of standard JSON types (integer, boolean, number, object...).
      * Will return the input if no match.
      *
-     * @param string|null $typeName
-     * @param mixed $value
-     *
-     * @return string
+     * @param  mixed  $value
      */
     public static function normalizeTypeName(?string $typeName, $value = null): string
     {
-        if (!$typeName) {
+        if (! $typeName) {
             return 'string';
         }
 
         $base = str_replace('[]', '', strtolower($typeName));
+
         return match ($base) {
             'bool' => str_replace($base, 'boolean', $typeName),
             'int' => str_replace($base, 'integer', $typeName),
@@ -216,7 +222,6 @@ trait ParamHelpers
      * Allows users to specify that we shouldn't generate an example for the parameter
      * by writing 'No-example'.
      *
-     * @param string $description
      *
      * @return bool If true, don't generate an example for this.
      */
@@ -229,9 +234,7 @@ trait ParamHelpers
      * Allows users to specify an example for the parameter by writing 'Example: the-example',
      * to be used in example requests and response calls.
      *
-     * @param string $description
-     * @param string $type The type of the parameter. Used to cast the example provided, if any.
-     *
+     * @param  string  $type The type of the parameter. Used to cast the example provided, if any.
      * @return array The description and included example.
      */
     protected function parseExampleFromParamDescription(string $description, string $type): array

@@ -18,11 +18,6 @@ class UrlParamsNormalizer
      * Normalize a URL from Laravel-style to something that's clearer for a non-Laravel user.
      * For instance, `/posts/{post}` would be clearer as `/posts/{id}`,
      * and `/users/{user}/posts/{post}` would be clearer as `/users/{user_id}/posts/{id}`
-     *
-     * @param \Illuminate\Routing\Route $route
-     * @param \ReflectionFunctionAbstract $method
-     *
-     * @return string
      */
     public static function normalizeParameterNamesInRouteUri(Route $route, ReflectionFunctionAbstract $method): string
     {
@@ -30,7 +25,7 @@ class UrlParamsNormalizer
         $uri = $route->uri;
         preg_match_all('#\{(\w+?)}#', $uri, $params);
 
-        $resourceRouteNames = [".index", ".show", ".update", ".destroy", ".store"];
+        $resourceRouteNames = ['.index', '.show', '.update', '.destroy', '.store'];
 
         $typeHintedEloquentModels = self::getTypeHintedEloquentModels($method);
         $routeName = $route->action['as'] ?? '';
@@ -56,10 +51,13 @@ class UrlParamsNormalizer
                 ];
 
                 $binding = self::getRouteKeyForUrlParam(
-                    $route, $singularResource, $typeHintedEloquentModels, 'id'
+                    $route,
+                    $singularResource,
+                    $typeHintedEloquentModels,
+                    'id'
                 );
 
-                if (!$alreadyFoundResourceParam) {
+                if (! $alreadyFoundResourceParam) {
                     // This is the first resource param (from the end).
                     // We set it to `params/{id}` (or whatever field it's bound to)
                     $replaceWith = ["$pluralResource/{{$binding}}", "$pluralResource/{{$binding}?}"];
@@ -105,7 +103,6 @@ class UrlParamsNormalizer
         return $arguments;
     }
 
-
     /**
      * Return the type-hinted method arguments in the action that are enums,
      * The arguments will be returned as an array of the form: [<variable_name> => $instance]
@@ -115,7 +112,9 @@ class UrlParamsNormalizer
         $arguments = [];
         foreach ($method->getParameters() as $argument) {
             $argumentType = $argument->getType();
-            if (!($argumentType instanceof \ReflectionNamedType)) continue;
+            if (! ($argumentType instanceof \ReflectionNamedType)) {
+                continue;
+            }
             try {
                 $reflectionEnum = new ReflectionEnum($argumentType->getName());
                 $arguments[$argument->getName()] = $reflectionEnum;
@@ -137,17 +136,16 @@ class UrlParamsNormalizer
      *
      * There are other ways, but they're dynamic and beyond our scope.
      *
-     * @param \Illuminate\Routing\Route $route
-     * @param string $paramName The name of the URL parameter
-     * @param array<string, Model> $typeHintedEloquentModels
-     * @param string|null $default Default field to use
-     *
-     * @return string|null
+     * @param  string  $paramName The name of the URL parameter
+     * @param  array<string, Model>  $typeHintedEloquentModels
+     * @param  string|null  $default Default field to use
      */
     protected static function getRouteKeyForUrlParam(
-        Route $route, string $paramName, array $typeHintedEloquentModels = [], string $default = null
-    ): ?string
-    {
+        Route $route,
+        string $paramName,
+        array $typeHintedEloquentModels = [],
+        string $default = null
+    ): ?string {
         if ($binding = self::getInlineRouteKey($route, $paramName)) {
             return $binding;
         }
@@ -157,11 +155,6 @@ class UrlParamsNormalizer
 
     /**
      * Return the `slug` in /posts/{post:slug}
-     *
-     * @param \Illuminate\Routing\Route $route
-     * @param string $paramName
-     *
-     * @return string|null
      */
     protected static function getInlineRouteKey(Route $route, string $paramName): ?string
     {
@@ -169,6 +162,7 @@ class UrlParamsNormalizer
         if (method_exists($route, 'bindingFieldFor')) {
             return $route->bindingFieldFor($paramName);
         }
+
         return null;
     }
 
@@ -178,10 +172,7 @@ class UrlParamsNormalizer
      * If there is, check if it's an Eloquent model.
      * If it is, return it's `getRouteKeyName()`.
      *
-     * @param string $paramName
-     * @param Model[] $typeHintedEloquentModels
-     *
-     * @return string|null
+     * @param  Model[]  $typeHintedEloquentModels
      */
     protected static function getRouteKeyFromModel(string $paramName, array $typeHintedEloquentModels): ?string
     {
@@ -190,6 +181,7 @@ class UrlParamsNormalizer
 
         if (array_key_exists($paramName, $typeHintedEloquentModels)) {
             $argumentInstance = $typeHintedEloquentModels[$paramName];
+
             return $argumentInstance->getRouteKeyName();
         }
 
@@ -207,16 +199,14 @@ class UrlParamsNormalizer
      * - the argument has a primitive type (eg `public function show(string $postId)`)
      * - the argument is an injected dependency that itself needs other dependencies
      *   (eg `public function show(PostsManager $manager)`)
-     *
-     * @param \ReflectionParameter $argument
-     *
-     * @return object|null
      */
     protected static function instantiateMethodArgument(\ReflectionParameter $argument): ?object
     {
         $argumentType = $argument->getType();
         // No type-hint, or primitive type
-        if (!($argumentType instanceof \ReflectionNamedType)) return null;
+        if (! ($argumentType instanceof \ReflectionNamedType)) {
+            return null;
+        }
 
         $argumentClassName = $argumentType->getName();
         if (class_exists($argumentClassName)) {

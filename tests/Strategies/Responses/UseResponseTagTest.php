@@ -2,10 +2,10 @@
 
 namespace Knuckles\Scribe\Tests\Strategies\Responses;
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Knuckles\Scribe\Extracting\Strategies\Responses\UseResponseTag;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use Mpociot\Reflection\DocBlock\Tag;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use PHPUnit\Framework\TestCase;
 
 class UseResponseTagTest extends TestCase
@@ -14,6 +14,7 @@ class UseResponseTagTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider responseTags
      */
     public function allows_multiple_response_tags_for_multiple_statuses_and_scenarios(array $tags, array $expected)
@@ -38,8 +39,9 @@ class UseResponseTagTest extends TestCase
         $response2 = '{
         "message": "Unauthorized"
      }';
+
         return [
-            "with status as initial position" => [
+            'with status as initial position' => [
                 [
                     new Tag('response', $response1),
                     new Tag('response', "401 $response2"),
@@ -63,7 +65,7 @@ class UseResponseTagTest extends TestCase
                 ],
             ],
 
-            "with fields" => [
+            'with fields' => [
                 [
                     new Tag('response', "scenario=\"success\" $response1"),
                     new Tag('response', "status=401 scenario='auth problem' $response2"),

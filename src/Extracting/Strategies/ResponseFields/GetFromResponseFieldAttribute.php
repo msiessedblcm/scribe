@@ -19,22 +19,25 @@ class GetFromResponseFieldAttribute extends PhpAttributeStrategy
 
     protected function extractFromAttributes(
         ExtractedEndpointData $endpointData,
-        array $attributesOnMethod, array $attributesOnFormRequest = [], array $attributesOnController = []
-    ): ?array
-    {
+        array $attributesOnMethod,
+        array $attributesOnFormRequest = [],
+        array $attributesOnController = []
+    ): ?array {
         $attributesOnApiResourceMethods = [];
         $apiResourceAttributes = $endpointData->method->getAttributes(ResponseFromApiResource::class);
 
-        if (!empty($apiResourceAttributes)) {
+        if (! empty($apiResourceAttributes)) {
             $attributesOnApiResourceMethods = collect($apiResourceAttributes)
                 ->flatMap(function (ReflectionAttribute $attribute) {
                     $className = $attribute->newInstance()->name;
                     $method = u::getReflectedRouteMethod([$className, 'toArray']);
-                    return collect($method->getAttributes(ResponseField::class))
-                        ->map(fn (ReflectionAttribute $attr) => $attr->newInstance());
-                });
-        }
 
+                    return collect($method->getAttributes(ResponseField::class))
+                        ->map(fn (ReflectionAttribute $attr) => $attr->newInstance())
+                    ;
+                })
+            ;
+        }
 
         return collect([...$attributesOnController, ...$attributesOnFormRequest, ...$attributesOnMethod, ...$attributesOnApiResourceMethods])
             ->mapWithKeys(function ($attributeInstance) use ($endpointData) {
@@ -44,6 +47,7 @@ class GetFromResponseFieldAttribute extends PhpAttributeStrategy
                 $data['type'] = ResponseFieldTools::inferTypeOfResponseField($data, $endpointData);
 
                 return [$data['name'] => $data];
-            })->toArray();
+            })->toArray()
+        ;
     }
 }

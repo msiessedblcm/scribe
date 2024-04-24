@@ -10,14 +10,14 @@ class Subgroup
     public function __construct(
         public string $name,
         public ?string $description = '',
-    ){
+    ) {
     }
 
     public function toArray()
     {
         return [
-            "subgroup" => $this->name,
-            "subgroupDescription" => $this->description,
+            'subgroup' => $this->name,
+            'subgroupDescription' => $this->description,
         ];
     }
 }

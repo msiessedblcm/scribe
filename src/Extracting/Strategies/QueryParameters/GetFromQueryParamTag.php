@@ -7,7 +7,7 @@ use Knuckles\Scribe\Extracting\Strategies\GetFieldsFromTagStrategy;
 
 class GetFromQueryParamTag extends GetFieldsFromTagStrategy
 {
-    protected string $tagName = "queryParam";
+    protected string $tagName = 'queryParam';
 
     public function parseTag(string $tagContent): array
     {
@@ -45,13 +45,13 @@ class GetFromQueryParamTag extends GetFieldsFromTagStrategy
                 } else {
                     $type = static::normalizeTypeName($type);
                     // Type in annotation is optional
-                    if (!$this->isSupportedTypeInDocBlocks($type)) {
+                    if (! $this->isSupportedTypeInDocBlocks($type)) {
                         // Then that wasn't a type, but part of the description
                         $description = trim("$type $description");
                         $type = '';
                     }
                 }
-            } else if ($this->isSupportedTypeInDocBlocks($description)) {
+            } elseif ($this->isSupportedTypeInDocBlocks($description)) {
                 // Only type was supplied
                 $type = $description;
                 $description = '';
@@ -60,7 +60,6 @@ class GetFromQueryParamTag extends GetFieldsFromTagStrategy
             $type = empty($type)
                 ? (Str::contains(strtolower($description), ['number', 'count', 'page']) ? 'integer' : 'string')
                 : static::normalizeTypeName($type);
-
         }
 
         [$description, $example, $enumValues, $exampleWasSpecified] =

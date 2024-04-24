@@ -9,11 +9,11 @@ use League\Fractal\Resource\Item;
 
 class TransformerResponseTools
 {
-    public static function fetch(string $transformerClass, bool $isCollection, $modelInstantiator, array $pagination = [], ?string $resourceKey = null, ?string $serializer = null)
+    public static function fetch(string $transformerClass, bool $isCollection, $modelInstantiator, array $pagination = [], string $resourceKey = null, string $serializer = null)
     {
         $fractal = new Manager();
 
-        if (!is_null($serializer)) {
+        if (! is_null($serializer)) {
             $fractal->setSerializer(app($serializer));
         }
 

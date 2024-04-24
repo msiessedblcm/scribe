@@ -2,6 +2,7 @@
 
 namespace Knuckles\Scribe\Writing;
 
+use function array_map;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -12,7 +13,6 @@ use Knuckles\Camel\Output\Parameter;
 use Knuckles\Scribe\Extracting\ParamHelpers;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use Knuckles\Scribe\Tools\Utils;
-use function array_map;
 
 class OpenAPISpecWriter
 {
@@ -30,9 +30,7 @@ class OpenAPISpecWriter
     /**
      * See https://swagger.io/specification/
      *
-     * @param array[] $groupedEndpoints
-     *
-     * @return array
+     * @param  array[]  $groupedEndpoints
      */
     public function generateSpecContent(array $groupedEndpoints): array
     {
@@ -59,8 +57,7 @@ class OpenAPISpecWriter
     }
 
     /**
-     * @param array[] $groupedEndpoints
-     *
+     * @param  array[]  $groupedEndpoints
      * @return mixed
      */
     protected function generatePathsSpec(array $groupedEndpoints)
@@ -68,9 +65,11 @@ class OpenAPISpecWriter
         $allEndpoints = collect($groupedEndpoints)->map->endpoints->flatten(1);
         // OpenAPI groups endpoints by path, then method
         $groupedByPath = $allEndpoints->groupBy(function ($endpoint) {
-            $path = str_replace("?}", "}", $endpoint->uri); // Remove optional parameters indicator in path
+            $path = str_replace('?}', '}', $endpoint->uri); // Remove optional parameters indicator in path
+
             return '/' . ltrim($path, '/');
         });
+
         return $groupedByPath->mapWithKeys(function (Collection $endpoints, $path) use ($groupedEndpoints) {
             $operations = $endpoints->mapWithKeys(function (OutputEndpointData $endpoint) use ($groupedEndpoints) {
                 $spec = [
@@ -88,7 +87,7 @@ class OpenAPISpecWriter
                     $spec['requestBody'] = $this->generateEndpointRequestBodySpec($endpoint);
                 }
 
-                if (!$endpoint->metadata->authenticated) {
+                if (! $endpoint->metadata->authenticated) {
                     // Make sure to exclude non-auth endpoints from auth
                     $spec['security'] = [];
                 }
@@ -149,7 +148,6 @@ class OpenAPISpecWriter
     /**
      * Add query parameters and headers.
      *
-     * @param OutputEndpointData $endpoint
      *
      * @return array<int, array<string,mixed>>
      */
@@ -177,10 +175,11 @@ class OpenAPISpecWriter
 
         if (count($endpoint->headers)) {
             foreach ($endpoint->headers as $name => $value) {
-                if (in_array(strtolower($name), ['content-type', 'accept', 'authorization']))
+                if (in_array(strtolower($name), ['content-type', 'accept', 'authorization'])) {
                     // These headers are not allowed in the spec.
                     // https://swagger.io/docs/specification/describing-parameters/#header-parameters
                     continue;
+                }
 
                 $parameters[] = [
                     'in' => 'header',
@@ -211,7 +210,7 @@ class OpenAPISpecWriter
             $hasFileParameter = false;
 
             foreach ($endpoint->nestedBodyParameters as $name => $details) {
-                if ($name === "[]") { // Request body is an array
+                if ($name === '[]') { // Request body is an array
                     $hasRequiredParameter = true;
                     $schema = $this->generateFieldData($details);
                     break;
@@ -249,7 +248,6 @@ class OpenAPISpecWriter
             }
 
             $body['content'][$contentType]['schema'] = $schema;
-
         }
 
         // return object rather than empty array, so can get properly serialised as object
@@ -283,17 +281,18 @@ class OpenAPISpecWriter
 
     protected function getResponseDescription(Response $response): string
     {
-        if (Str::startsWith($response->content, "<<binary>>")) {
-            return trim(str_replace("<<binary>>", "", $response->content));
+        if (Str::startsWith($response->content, '<<binary>>')) {
+            return trim(str_replace('<<binary>>', '', $response->content));
         }
 
         $description = strval($response->description);
         // Don't include the status code in description; see https://github.com/knuckleswtf/scribe/issues/271
         if (preg_match("/\d{3},\s+(.+)/", $description, $matches)) {
             $description = $matches[1];
-        } else if ($description === strval($response->status)) {
+        } elseif ($description === strval($response->status)) {
             $description = '';
         }
+
         return $description;
     }
 
@@ -349,7 +348,7 @@ class OpenAPISpecWriter
                 ];
 
             case 'array':
-                if (!count($decoded)) {
+                if (! count($decoded)) {
                     // empty array
                     return [
                         'application/json' => [
@@ -397,7 +396,7 @@ class OpenAPISpecWriter
     protected function generateSecurityPartialSpec(): array
     {
         $isApiAuthed = $this->config->get('auth.enabled', false);
-        if (!$isApiAuthed) {
+        if (! $isApiAuthed) {
             return [];
         }
 
@@ -446,9 +445,7 @@ class OpenAPISpecWriter
     }
 
     /**
-     * @param Parameter|array $field
-     *
-     * @return array
+     * @param  Parameter|array  $field
      */
     public function generateFieldData($field): array
     {
@@ -463,14 +460,14 @@ class OpenAPISpecWriter
                 'format' => 'binary',
                 'description' => $field->description ?: '',
             ];
-        } else if (Utils::isArrayType($field->type)) {
+        } elseif (Utils::isArrayType($field->type)) {
             $baseType = Utils::getBaseTypeFromArrayType($field->type);
             $baseItem = ($baseType === 'file') ? [
                 'type' => 'string',
                 'format' => 'binary',
             ] : ['type' => $baseType];
 
-            if (!empty($field->enumValues)) {
+            if (! empty($field->enumValues)) {
                 $baseItem['enum'] = $field->enumValues;
             }
 
@@ -486,12 +483,12 @@ class OpenAPISpecWriter
                     ])
                     : $baseItem,
             ];
-            if (str_replace('[]', "", $field->type) === 'file') {
+            if (str_replace('[]', '', $field->type) === 'file') {
                 // Don't include example for file params in OAS; it's hard to translate it correctly
                 unset($fieldData['example']);
             }
 
-            if ($baseType === 'object' && !empty($field->__fields)) {
+            if ($baseType === 'object' && ! empty($field->__fields)) {
                 if ($fieldData['items']['type'] === 'object') {
                     $fieldData['items']['properties'] = [];
                 }
@@ -504,7 +501,7 @@ class OpenAPISpecWriter
             }
 
             return $fieldData;
-        } else if ($field->type === 'object') {
+        } elseif ($field->type === 'object') {
             return [
                 'type' => 'object',
                 'description' => $field->description ?: '',
@@ -519,7 +516,7 @@ class OpenAPISpecWriter
                 'description' => $field->description ?: '',
                 'example' => $field->example,
             ];
-            if (!empty($field->enumValues)) {
+            if (! empty($field->enumValues)) {
                 $schema['enum'] = $field->enumValues;
             }
 
@@ -529,10 +526,13 @@ class OpenAPISpecWriter
 
     protected function operationId(OutputEndpointData $endpoint): string
     {
-        if ($endpoint->metadata->title) return preg_replace('/[^\w+]/', '', Str::camel($endpoint->metadata->title));
+        if ($endpoint->metadata->title) {
+            return preg_replace('/[^\w+]/', '', Str::camel($endpoint->metadata->title));
+        }
 
         $parts = preg_split('/[^\w+]/', $endpoint->uri, -1, PREG_SPLIT_NO_EMPTY);
-        return Str::lower($endpoint->httpMethods[0]) . join('', array_map(fn($part) => ucfirst($part), $parts));
+
+        return Str::lower($endpoint->httpMethods[0]) . implode('', array_map(fn ($part) => ucfirst($part), $parts));
     }
 
     /**
@@ -552,7 +552,7 @@ class OpenAPISpecWriter
     public function generateSchemaForValue(mixed $value, OutputEndpointData $endpoint, string $path): array
     {
         if ($value instanceof \stdClass) {
-            $value = (array)$value;
+            $value = (array) $value;
             $properties = [];
             // Recurse into the object
             foreach ($value as $subField => $subValue) {
@@ -574,7 +574,7 @@ class OpenAPISpecWriter
             $schema['description'] = $endpoint->responseFields[$path]->description;
         }
 
-        if ($schema['type'] === 'array' && !empty($value)) {
+        if ($schema['type'] === 'array' && ! empty($value)) {
             $schema['example'] = json_decode(json_encode($schema['example']), true); // Convert stdClass to array
 
             $sample = $value[0];

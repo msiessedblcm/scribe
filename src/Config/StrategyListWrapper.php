@@ -16,7 +16,6 @@ class StrategyListWrapper
     public function __construct(
         public array $strategies = []
     ) {
-
     }
 
     public function override(array $valuesToOverride): self
@@ -29,6 +28,7 @@ class StrategyListWrapper
         foreach ($newStrategies as $newStrategy) {
             $this->strategies[] = $newStrategy;
         }
+
         return $this;
     }
 
@@ -36,6 +36,7 @@ class StrategyListWrapper
     {
         $correspondingStrategies = Arr::where($this->strategies, function ($strategy) use ($strategyNamesToRemove) {
             $strategyName = is_string($strategy) ? $strategy : $strategy[0];
+
             return in_array($strategyName, $strategyNamesToRemove);
         });
 
@@ -50,6 +51,7 @@ class StrategyListWrapper
     {
         $this->strategies = array_map(function ($strategy) use ($configurationTuple) {
             $strategyName = is_string($strategy) ? $strategy : $strategy[0];
+
             return $strategyName == $configurationTuple[0] ? $configurationTuple : $strategy;
         }, $this->strategies);
 

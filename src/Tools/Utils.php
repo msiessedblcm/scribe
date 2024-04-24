@@ -35,8 +35,6 @@ class Utils
      * ]
      *
      * This method extracts the top-level options (['a', 'b'])
-     *
-     * @param array $mixedList
      */
     public static function getTopLevelItemsFromMixedConfigList(array $mixedList): array
     {
@@ -44,6 +42,7 @@ class Utils
         foreach ($mixedList as $item => $value) {
             $topLevels[] = is_int($item) ? $value : $item;
         }
+
         return $topLevels;
     }
 
@@ -56,10 +55,7 @@ class Utils
      * Transform parameters in URLs into real values (/users/{user} -> /users/2).
      * Uses @urlParam values specified by caller, otherwise just uses '1'.
      *
-     * @param string $uri
-     * @param array $urlParameters Dictionary of url params and example values
-     *
-     * @return string
+     * @param  array  $urlParameters Dictionary of url params and example values
      */
     public static function replaceUrlParameterPlaceholdersWithValues(string $uri, array $urlParameters): string
     {
@@ -73,9 +69,10 @@ class Utils
             // See https://github.com/nikic/FastRoute#overriding-the-route-parser-and-dispatcher
             $possibilityWithAllSegmentsPresent = end($possibilities);
             foreach ($possibilityWithAllSegmentsPresent as $part) {
-                if (!is_array($part)) {
+                if (! is_array($part)) {
                     // It's just a path segment, not a URL parameter'
                     $boundUri .= $part;
+
                     continue;
                 }
 
@@ -115,8 +112,7 @@ class Utils
                 [$class, $method] = $usesArray;
 
                 // Support for the Laravel Actions package, docblock should be put on the asController method
-                if ($method === '__invoke' && method_exists($class, 'asController'))
-                {
+                if ($method === '__invoke' && method_exists($class, 'asController')) {
                     return [$class, 'asController'];
                 }
 
@@ -135,7 +131,7 @@ class Utils
         throw new Exception("Couldn't get class and method names for route " . c::getRouteRepresentation($route) . '.');
     }
 
-    public static function deleteDirectoryAndContents(string $dir, ?string $workingDir = null): void
+    public static function deleteDirectoryAndContents(string $dir, string $workingDir = null): void
     {
         if (class_exists(LocalFilesystemAdapter::class)) {
             // Flysystem 2+
@@ -159,23 +155,27 @@ class Utils
             // Flysystem 2+
             $adapter = new LocalFilesystemAdapter(getcwd());
             $fs = new Filesystem($adapter);
+
             return $fs->listContents($dir);
         } else {
             // v1
             $adapter = new \League\Flysystem\Adapter\Local(getcwd()); // @phpstan-ignore-line
             $fs = new Filesystem($adapter); // @phpstan-ignore-line
             $dir = str_replace($adapter->getPathPrefix(), '', $dir); // @phpstan-ignore-line
+
             return $fs->listContents($dir);
         }
     }
 
     public static function copyDirectory(string $src, string $dest): void
     {
-        if (!is_dir($src)) return;
+        if (! is_dir($src)) {
+            return;
+        }
 
         // If the destination directory does not exist create it
-        if (!is_dir($dest)) {
-            if (!mkdir($dest, 0777, true)) {
+        if (! is_dir($dest)) {
+            if (! mkdir($dest, 0777, true)) {
                 // If the destination directory could not be created stop processing
                 throw new Exception("Failed to create target directory: $dest");
             }
@@ -186,7 +186,7 @@ class Utils
         foreach ($i as $f) {
             if ($f->isFile()) {
                 copy($f->getRealPath(), "$dest/" . $f->getFilename());
-            } else if (!$f->isDot() && $f->isDir()) {
+            } elseif (! $f->isDot() && $f->isDir()) {
                 self::copyDirectory($f->getRealPath(), "$dest/$f");
             }
         }
@@ -221,9 +221,7 @@ class Utils
     }
 
     /**
-     * @param mixed $value
-     *
-     * @return bool
+     * @param  mixed  $value
      */
     public static function isInvokableObject($value): bool
     {
@@ -233,11 +231,8 @@ class Utils
     /**
      * Returns the route method or closure as an instance of ReflectionMethod or ReflectionFunction
      *
-     * @param array $routeControllerAndMethod
      *
-     * @return ReflectionFunctionAbstract
      * @throws ReflectionException
-     *
      */
     public static function getReflectedRouteMethod(array $routeControllerAndMethod): ReflectionFunctionAbstract
     {
@@ -264,11 +259,10 @@ class Utils
     }
 
     /**
-     * @param string $modelName
-     * @param string[] $states
-     * @param string[] $relations
-     *
+     * @param  string[]  $states
+     * @param  string[]  $relations
      * @return \Illuminate\Database\Eloquent\Factories\Factory
+     *
      * @throws \Throwable
      */
     public static function getModelFactory(string $modelName, array $states = [], array $relations = [])
@@ -279,7 +273,7 @@ class Utils
 
         if (method_exists($modelName, 'factory')) { // Laravel 8 type factory
             /** @var \Illuminate\Database\Eloquent\Factories\Factory $factory */
-            $factory = call_user_func_array([$modelName, 'factory'], []);
+                $factory = call_user_func_array([$modelName, 'factory'], []);
             foreach ($states as $state) {
                 if (method_exists(get_class($factory), $state)) {
                     $factory = $factory->$state();
@@ -306,7 +300,7 @@ class Utils
                         : [];
 
                     $factory = $factory->hasAttached($factoryChain, $pivot, $relationVector);
-                } else if ($relationType === BelongsTo::class) {
+                } elseif ($relationType === BelongsTo::class) {
                     $factory = $factory->for($factoryChain, $relationVector);
                 } else {
                     $factory = $factory->has($factoryChain, $relationVector);
@@ -316,7 +310,7 @@ class Utils
             try {
                 $factory = factory($modelName);
             } catch (Throwable $e) {
-                if (Str::contains($e->getMessage(), "Call to undefined function Knuckles\\Scribe\\Tools\\factory()")) {
+                if (Str::contains($e->getMessage(), 'Call to undefined function Knuckles\\Scribe\\Tools\\factory()')) {
                     throw CouldntFindFactory::forModel($modelName);
                 } else {
                     throw $e;
@@ -347,16 +341,14 @@ class Utils
     /**
      * Filter a list of docblock tags to those matching the specified ones (case-insensitive).
      *
-     * @param Tag[] $tags
-     * @param string ...$names
-     *
+     * @param  Tag[]  $tags
      * @return Tag[]
      */
     public static function filterDocBlockTags(array $tags, string ...$names): array
     {
         // Avoid "holes" in the keys of the filtered array by using array_values
         return array_values(
-            array_filter($tags, fn($tag) => in_array(strtolower($tag->getName()),$names))
+            array_filter($tags, fn ($tag) => in_array(strtolower($tag->getName()), $names))
         );
     }
 
@@ -369,7 +361,7 @@ class Utils
     public static function trans(string $key, array $replace = [])
     {
         // We only load our custom translation layer if we really need it
-        if (!ScribeServiceProvider::$customTranslationLayerLoaded) {
+        if (! ScribeServiceProvider::$customTranslationLayerLoaded) {
             app(ScribeServiceProvider::class, ['app' => app()])->loadCustomTranslationLayer();
         }
 
@@ -378,7 +370,6 @@ class Utils
         if ($translation === $key || $translation === null) {
             $translation = trans($key, $replace, 'en');
         }
-
 
         if ($translation === $key) {
             throw new \Exception("Translation not found for $key. You can add a translation for this in your `lang/scribe.php`, but this is likely a problem with the package. Please open an issue.");
@@ -390,9 +381,10 @@ class Utils
 
 function getTopLevelItemsFromMixedOrderList(array $mixedList): array
 {
-  $topLevels = [];
-  foreach ($mixedList as $item => $value) {
-    $topLevels[] = is_int($item) ? $value : $item;
-  }
-  return $topLevels;
+    $topLevels = [];
+    foreach ($mixedList as $item => $value) {
+        $topLevels[] = is_int($item) ? $value : $item;
+    }
+
+    return $topLevels;
 }

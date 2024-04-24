@@ -15,8 +15,8 @@ class ValidatorMake
     public static function find(Node $node)
     {
         // Make sure it's an assignment
-        if (!($node instanceof Node\Stmt\Expression)
-            || !($node->expr instanceof Node\Expr\Assign)) {
+        if (! ($node instanceof Node\Stmt\Expression)
+            || ! ($node->expr instanceof Node\Expr\Assign)) {
             return;
         }
 
@@ -24,9 +24,9 @@ class ValidatorMake
 
         if (
             $expr instanceof Node\Expr\StaticCall
-            && !empty($expr->class->name)
-            && str_ends_with($expr->class->name, "Validator")
-            && $expr->name->name == "make"
+            && ! empty($expr->class->name)
+            && str_ends_with($expr->class->name, 'Validator')
+            && $expr->name->name == 'make'
         ) {
             return $expr->args[1]->value;
         }

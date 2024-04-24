@@ -183,6 +183,7 @@ class ExtractorTest extends BaseUnitTest
 
     /**
      * @test
+     *
      * @dataProvider authRules
      */
     public function adds_appropriate_field_based_on_configured_auth_type($config, $expected)
@@ -240,9 +241,10 @@ class ExtractorTest extends BaseUnitTest
          * Can be multiple lines.
          *
          * @queryParam location_id required The id of the location.
+         *
          * @bodyParam name required Name of the location
          */
-        $handler = fn() => 'hi';
+        $handler = fn () => 'hi';
         $route = $this->createClosureRoute('POST', '/api/closure/test', $handler);
 
         $parsed = $this->extractor->processRoute($route);
@@ -273,7 +275,7 @@ class ExtractorTest extends BaseUnitTest
         $this->assertSame('Parent description', $parent->metadata->description);
         $this->assertCount(1, $parent->responses);
         $this->assertCount(1, $parent->bodyParameters);
-        $this->assertArraySubset(["type" => "integer"], $parent->bodyParameters['thing']->toArray());
+        $this->assertArraySubset(['type' => 'integer'], $parent->bodyParameters['thing']->toArray());
         $this->assertEmpty($parent->queryParameters);
 
         $inheritedRoute = $this->createRoute('POST', '/api/test', 'endpoint', TestInheritedController::class);
@@ -283,10 +285,10 @@ class ExtractorTest extends BaseUnitTest
         $this->assertSame('Parent description', $inherited->metadata->description);
         $this->assertCount(0, $inherited->responses);
         $this->assertCount(2, $inherited->bodyParameters);
-        $this->assertArraySubset(["type" => "integer"], $inherited->bodyParameters['thing']->toArray());
-        $this->assertArraySubset(["type" => "string"], $inherited->bodyParameters["other_thing"]->toArray());
+        $this->assertArraySubset(['type' => 'integer'], $inherited->bodyParameters['thing']->toArray());
+        $this->assertArraySubset(['type' => 'string'], $inherited->bodyParameters['other_thing']->toArray());
         $this->assertCount(1, $inherited->queryParameters);
-        $this->assertArraySubset(["type" => "string"], $inherited->queryParameters["queryThing"]->toArray());
+        $this->assertArraySubset(['type' => 'string'], $inherited->queryParameters['queryThing']->toArray());
     }
 
     public function createRoute(string $httpMethod, string $path, string $controllerMethod, $class = TestController::class)
@@ -376,7 +378,6 @@ class ExtractorTest extends BaseUnitTest
     }
 }
 
-
 class TestParentController
 {
     /**
@@ -387,11 +388,11 @@ class TestParentController
      * @group Parent group name
      *
      * @bodyParam thing integer
+     *
      * @response {"hello":"there"}
      */
     public function endpoint()
     {
-
     }
 }
 
@@ -400,12 +401,12 @@ class TestInheritedController extends TestParentController
     public static function inheritedDocsOverrides()
     {
         return [
-            "endpoint" => [
-                "metadata" => [
-                    "title" => "Overridden title",
-                    "groupName" => "Overridden group name",
+            'endpoint' => [
+                'metadata' => [
+                    'title' => 'Overridden title',
+                    'groupName' => 'Overridden group name',
                 ],
-                "queryParameters" => function (ExtractedEndpointData $endpointData) {
+                'queryParameters' => function (ExtractedEndpointData $endpointData) {
                     // Overrides
                     return [
                         'queryThing' => [
@@ -413,13 +414,13 @@ class TestInheritedController extends TestParentController
                         ],
                     ];
                 },
-                "bodyParameters" => [
+                'bodyParameters' => [
                     // Merges
-                    "other_thing" => [
-                        "type" => "string",
+                    'other_thing' => [
+                        'type' => 'string',
                     ],
                 ],
-                "responses" => function (ExtractedEndpointData $endpointData) {
+                'responses' => function (ExtractedEndpointData $endpointData) {
                     // Completely overrides responses
                     return [];
                 },

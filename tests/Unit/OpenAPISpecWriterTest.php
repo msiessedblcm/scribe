@@ -77,7 +77,7 @@ class OpenAPISpecWriterTest extends BaseUnitTest
         $endpointData1 = $this->createMockEndpointData(['uri' => 'path1', 'httpMethods' => ['GET'], 'metadata.authenticated' => true]);
         $endpointData2 = $this->createMockEndpointData(['uri' => 'path1', 'httpMethods' => ['POST'], 'metadata.authenticated' => false]);
         $groups = [$this->createGroup([$endpointData1, $endpointData2])];
-        $extraInfo = "When stuck trying to authenticate, have a coffee!";
+        $extraInfo = 'When stuck trying to authenticate, have a coffee!';
         $config = array_merge($this->config, [
             'auth' => [
                 'enabled' => true,
@@ -213,7 +213,7 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                 ],
             ],
         ]);
-        $endpointData2 = $this->createMockEndpointData(['headers' => [], 'httpMethods' => ['POST'], 'uri' => '/path1',]);
+        $endpointData2 = $this->createMockEndpointData(['headers' => [], 'httpMethods' => ['POST'], 'uri' => '/path1']);
         $groups = [$this->createGroup([$endpointData1, $endpointData2])];
 
         $results = $this->generate($groups);
@@ -309,14 +309,14 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                     'name' => 'objectArrayParam[].field1',
                     'description' => 'Object array param first field',
                     'required' => true,
-                    'example' => ["hello"],
+                    'example' => ['hello'],
                     'type' => 'string[]',
                 ],
                 'objectArrayParam[].field2' => [
                     'name' => 'objectArrayParam[].field2',
                     'description' => '',
                     'required' => false,
-                    'example' => "hi",
+                    'example' => 'hi',
                     'type' => 'string',
                 ],
             ],
@@ -404,12 +404,12 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                                                 'type' => 'string',
                                             ],
                                             'description' => 'Object array param first field',
-                                            'example' => ["hello"],
+                                            'example' => ['hello'],
                                         ],
                                         'field2' => [
                                             'type' => 'string',
                                             'description' => '',
-                                            'example' => "hi",
+                                            'example' => 'hi',
                                         ],
                                     ],
                                 ],
@@ -445,9 +445,9 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                     'type' => 'string',
                     'description' => 'Parameter description, ha!',
                 ],
-                'sub level 0.sub level 1 key 3.sub level 2 key 1'=> [
+                'sub level 0.sub level 1 key 3.sub level 2 key 1' => [
                     'description' => 'This is description of nested object',
-                ]
+                ],
             ],
         ]);
         $endpointData2 = $this->createMockEndpointData([
@@ -482,7 +482,7 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                                 ],
                                 'and this' => [
                                     'description' => 'Parameter description, ha!',
-                                    'example' => "too",
+                                    'example' => 'too',
                                     'type' => 'string',
                                 ],
                                 'sub level 0' => [
@@ -490,7 +490,7 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                                     'properties' => [
                                         'sub level 1 key 1' => [
                                             'type' => 'string',
-                                            'example' => 'sl0_sl1k1'
+                                            'example' => 'sl0_sl1k1',
                                         ],
                                         'sub level 1 key 2' => [
                                             'type' => 'array',
@@ -498,13 +498,13 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                                                 [
                                                     'sub level 2 key 1' => 'sl0_sl1k2_sl2k1',
                                                     'sub level 2 key 2' => [
-                                                        'sub level 3 key 1' => 'sl0_sl1k2_sl2k2_sl3k1'
-                                                    ]
-                                                ]
+                                                        'sub level 3 key 1' => 'sl0_sl1k2_sl2k2_sl3k1',
+                                                    ],
+                                                ],
                                             ],
                                             'items' => [
-                                                'type' => 'object'
-                                            ]
+                                                'type' => 'object',
+                                            ],
                                         ],
                                         'sub level 1 key 3' => [
                                             'type' => 'object',
@@ -512,29 +512,29 @@ class OpenAPISpecWriterTest extends BaseUnitTest
                                                 'sub level 2 key 1' => [
                                                     'type' => 'string',
                                                     'example' => 'sl0_sl1k3_sl2k2',
-                                                    'description' => 'This is description of nested object'
+                                                    'description' => 'This is description of nested object',
                                                 ],
                                                 'sub level 2 key 2' => [
                                                     'type' => 'object',
                                                     'properties' => [
                                                         'sub level 3 key 1' => [
                                                             'type' => 'string',
-                                                            'example' => 'sl0_sl1k3_sl2k2_sl3k1'
+                                                            'example' => 'sl0_sl1k3_sl2k2_sl3k1',
                                                         ],
                                                         'sub level 3 key null' => [
                                                             'type' => 'string',
-                                                            'example' => null
+                                                            'example' => null,
                                                         ],
                                                         'sub level 3 key integer' => [
                                                             'type' => 'integer',
-                                                            'example' => 99
-                                                        ]
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
+                                                            'example' => 99,
+                                                        ],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
                             ],
                         ],
                     ],
@@ -595,6 +595,7 @@ class OpenAPISpecWriterTest extends BaseUnitTest
     protected function createGroup(array $endpoints)
     {
         $faker = Factory::create();
+
         return [
             'description' => '',
             'name' => $faker->randomElement(['Endpoints', 'Group A', 'Group B']),
@@ -605,6 +606,7 @@ class OpenAPISpecWriterTest extends BaseUnitTest
     protected function generate(array $groups): array
     {
         $writer = new OpenAPISpecWriter(new DocumentationConfig($this->config));
+
         return $writer->generateSpecContent($groups);
     }
 }

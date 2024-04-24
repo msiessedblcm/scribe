@@ -2,12 +2,12 @@
 
 namespace Knuckles\Scribe\Tests\Strategies\BodyParameters;
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Illuminate\Routing\Route;
 use Knuckles\Scribe\Extracting\Strategies\BodyParameters\GetFromBodyParamTag;
 use Knuckles\Scribe\Tests\Fixtures\TestController;
 use Knuckles\Scribe\Tools\DocumentationConfig;
 use Mpociot\Reflection\DocBlock\Tag;
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use PHPUnit\Framework\TestCase;
 
 class GetFromBodyParamTagTest extends TestCase
@@ -201,7 +201,7 @@ class GetFromBodyParamTagTest extends TestCase
     public function can_fetch_from_form_request_method_argument()
     {
         $method = new \ReflectionMethod(TestController::class, 'withFormRequestParameter');
-        $route = new Route(['POST'], "/withFormRequestParameter", ['uses' => [TestController::class, 'withFormRequestParameter']]);
+        $route = new Route(['POST'], '/withFormRequestParameter', ['uses' => [TestController::class, 'withFormRequestParameter']]);
 
         $results = $this->strategy->getParametersFromDocBlockInFormRequestOrMethod($route, $method);
 
@@ -228,11 +228,11 @@ class GetFromBodyParamTagTest extends TestCase
                 'required' => false,
                 'description' => '',
             ],
-            "ids" => [
-                "name" => "ids",
-                "type" => "integer[]",
-                "description" => "",
-                "required" => false,
+            'ids' => [
+                'name' => 'ids',
+                'type' => 'integer[]',
+                'description' => '',
+                'required' => false,
             ],
         ], $results);
     }
@@ -253,5 +253,4 @@ class GetFromBodyParamTagTest extends TestCase
             ],
         ], $results);
     }
-
 }
