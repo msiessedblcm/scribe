@@ -108,6 +108,10 @@ class ApiResourceResponseTools
         }
         $resource::$wrap = $key ?? $resource::$wrap;
 
+        if (in_array("Orbit\Concerns\Orbital", class_uses($modelInstance))) {
+            $modelInstance->delete();
+        }
+
         return $resource->additional($additionalData);
     }
 

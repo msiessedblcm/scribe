@@ -243,8 +243,8 @@ class OutputEndpointData extends BaseDTO
                 Arr::set($finalParameters, $dotPath, $parameter);
             } else { // A regular field, not a subfield of anything
                 // Note: we're assuming any subfields of this field are listed *after* it,
-                            // and will set __fields correctly when we iterate over them
-                            // Hence why we create a new "normalisedParameters" array above and push the parent to that first
+                                    // and will set __fields correctly when we iterate over them
+                                    // Hence why we create a new "normalisedParameters" array above and push the parent to that first
                     $parameter['__fields'] = [];
                 $finalParameters[$name] = $parameter;
             }

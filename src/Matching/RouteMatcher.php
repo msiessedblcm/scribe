@@ -35,7 +35,11 @@ class RouteMatcher implements RouteMatcherInterface
                     continue;
                 }
 
-                if ($this->shouldIncludeRoute($route, $routeRule, $includes, $usingDingoRouter)) {
+                $existingUris = array_map(function (MatchedRoute $matchedRoute) {
+                    return $matchedRoute->getRoute()->uri;
+                }, $matchedRoutes);
+
+                if ($this->shouldIncludeRoute($route, $routeRule, $includes, $usingDingoRouter, $existingUris)) {
                     $matchedRoutes[] = new MatchedRoute($route, $routeRule['apply'] ?? []);
                 }
             }
@@ -61,7 +65,7 @@ class RouteMatcher implements RouteMatcherInterface
         ;
     }
 
-    private function shouldIncludeRoute(Route $route, array $routeRule, array $mustIncludes, bool $usingDingoRouter): bool
+    private function shouldIncludeRoute(Route $route, array $routeRule, array $mustIncludes, bool $usingDingoRouter, array $existingUris): bool
     {
         if (RoutePatternMatcher::matches($route, $mustIncludes)) {
             return true;
@@ -75,7 +79,7 @@ class RouteMatcher implements RouteMatcherInterface
         $domainsToMatch = $routeRule['match']['domains'] ?? [];
         $pathsToMatch = $routeRule['match']['prefixes'] ?? [];
 
-        return Str::is($domainsToMatch, $route->getDomain()) && Str::is($pathsToMatch, $route->uri())
+        return Str::is($domainsToMatch, $route->getDomain()) && Str::is($pathsToMatch, $route->uri()) && ! in_array($route->uri(), $existingUris)
             && $matchesVersion;
     }
 
@@ -92,6 +96,6 @@ class RouteMatcher implements RouteMatcherInterface
             $excludes[] = 'telescope/*';
         }
 
-        return RoutePatternMatcher::matches($route, $excludes);
+        return RoutePatternMatcher::matches($route, [], $excludes);
     }
 }

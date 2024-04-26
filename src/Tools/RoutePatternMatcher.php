@@ -14,7 +14,7 @@ class RoutePatternMatcher
         $routePathWithInitialSlash = "/$routePathWithoutInitialSlash";
         $routeMethods = $route->methods();
         if (Str::is($patterns, $routeName)
-            || Str::is($patterns, $routePathWithoutInitialSlash)
+            || (Str::is($patterns, $routePathWithoutInitialSlash))
             || Str::is($patterns, $routePathWithInitialSlash)) {
             return true;
         }
