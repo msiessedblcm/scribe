@@ -36,7 +36,7 @@ class RouteMatcher implements RouteMatcherInterface
                 }
 
                 $existingUris = array_map(function (MatchedRoute $matchedRoute) {
-                    return $matchedRoute->getRoute()->uri;
+                    return $matchedRoute->getRoute()->methods[0] . ' ' . $matchedRoute->getRoute()->uri;
                 }, $matchedRoutes);
 
                 if ($this->shouldIncludeRoute($route, $routeRule, $includes, $usingDingoRouter, $existingUris)) {
